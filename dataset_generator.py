@@ -25,7 +25,7 @@ def print_preflist(preflist):
 
 def create_ranklist(num_agents):
     # creates a preference list for one agent
-    perm = np.array(list(range(1, num_agents + 1)))
+    perm = np.array(list(range(num_agents)))
     # creates a list of agents
     #  from 0 to num_agents-1
     ranklist = np.zeros((num_agents, num_agents), dtype=int)
