@@ -11,6 +11,7 @@ from rotations import find_a_rotation, eliminate_rotation, print_rotations
 from graph_construction import closed_subset_finder, create_rotation_digraph, print_graph, predecessors, topological_sort, assign_weights, print_weights, max_weight_subset_1, max_weight_subset_2, stable_matching
 from measures import reg, eg, disp, nsw, statistics
 from experiments import plot_3d, plot_circle, plot_bps, plot_regret, plot_egalitarian, plot_disparity, plot_nsw, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, plot_pairs
+from concurrent.futures import ProcessPoolExecutor
 np.random.seed(69)
 
 def convert_to_builtin(obj):
@@ -159,11 +160,13 @@ def execute(num_agents, num_iters):
             results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
 
 
-num_agents = []
-for n in range(5, 21):
-    print("Number of Agents = ", n)
-    execute(n, 10000000)
-    num_agents.append(n)
+def run(n):
+    print(f"Number of Agents = {n}")
+    return execute(n, 10000000)
+
+if __name__ == "__main__":
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(run, range(5, 21)))
 
 # preflist = [[[2, 1, 4, 0, 3],
 #              [0, 4, 1, 3, 2],
