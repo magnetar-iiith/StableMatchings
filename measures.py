@@ -13,8 +13,8 @@ def eg(matching, preflist):
     # calculate summation of ranks
     d_m, d_w, n = 0, 0, len(preflist[0])
     for m, w in enumerate(matching):
-        rank_m = preflist[0][m].index(w) + 1
-        rank_w = preflist[1][w].index(m) + 1
+        rank_m = n - preflist[0][m].index(w)
+        rank_w = n - preflist[1][w].index(m)
         d_m += rank_m
         d_w += rank_w
     return (d_m + d_w)/(2*n)
@@ -33,8 +33,8 @@ def nsw(matching, preflist):
     # calculate nash social welfare
     d_m, d_w, n = 1, 1, len(preflist[0])
     for m, w in enumerate(matching):
-        rank_m = preflist[0][m].index(w) + 1 # Rank starts from 1
-        rank_w = preflist[1][w].index(m) + 1 # Rank starts from 1
+        rank_m = n - preflist[0][m].index(w) # Rank starts from 1
+        rank_w = n - preflist[1][w].index(m) # Rank starts from 1
         d_m *= rank_m**(1/(2*n))
         d_w *= rank_w**(1/(2*n))
     return (d_m*d_w)
