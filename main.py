@@ -13,6 +13,7 @@ from measures import reg, eg, disp, nsw, statistics
 from experiments import plot_3d, plot_circle, plot_bps, plot_regret, plot_egalitarian, plot_disparity, plot_nsw, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, plot_pairs
 from concurrent.futures import ProcessPoolExecutor
 from itertools import permutations, product
+from time import time
 np.random.seed(69)
 
 def convert_to_builtin(obj):
@@ -190,8 +191,15 @@ def run(n):
     execute(n, 100000)
 # execute(4)
 if __name__ == "__main__":
+    start_time = time.time()
     with ProcessPoolExecutor() as executor:
         results = list(executor.map(run, range(5, 51)))
+    end_time = time.time()
+    hrs = (end_time - start_time)/3600
+    mins = ((end_time - start_time)%3600)/60
+    secs = (end_time - start_time) % 3600
+    print(f"Time taken = {hrs} hours {mins} minutes {secs} seconds")
+
 
 # preflist = [[[2, 1, 4, 0, 3],
 #              [0, 4, 1, 3, 2],
