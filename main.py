@@ -13,6 +13,7 @@ from measures import reg, eg, disp, nsw, statistics
 from concurrent.futures import ProcessPoolExecutor
 from itertools import permutations, product
 import time
+import os
 np.random.seed(69)
 
 def convert_to_builtin(obj):
@@ -51,13 +52,16 @@ def generate_instances(n):
         yield [men, women]
 
 def execute(num_agents, num_iters):
+    output_folder = "./matchings"
+    os.makedirs(output_folder, exist_ok=True)
+    filename = f"matchings_n={num_agents}_iters={num_iters}_create_preflist.json"
+    filepath = os.path.join(output_folder, filename)
 # def execute(num_agents):
     # reg_1_list, reg_2_list, reg_3_list, reg_4_list = [], [], [], []
     # eg_1_list, eg_2_list, eg_3_list, eg_4_list = [], [], [], []
     # disp_1_list, disp_2_list, disp_3_list, disp_4_list = [], [], [], []
     # nsw_1_list, nsw_2_list, nsw_3_list, nsw_4_list = [], [], [], []
-    file_name = f"matchings_n={num_agents}_iters={num_iters}_create_preflist.json"
-    with open(file_name, 'w') as results_file:
+    with open(filepath, 'w') as results_file:
         for iter in range(num_iters):
             if iter % 20000 == 0:
                 print(iter)
@@ -108,7 +112,7 @@ def execute(num_agents, num_iters):
             min_eg  = float('inf')
             min_disp  = float('inf')
             min_nsw  = float('inf')
-            Reg_closed_subset, Eg_closed_subset, Disp_closed_subset, Snsw_closed_subset = None, None, None, None
+            # Reg_closed_subset, Eg_closed_subset, Disp_closed_subset, Snsw_closed_subset = None, None, None, None
             min_reg_matching, max_eg_matching, min_disp_matching, max_nsw_matching = None, None, None, None
             for subset in closed_subsets:
                 copy_men_shortlists = copy.deepcopy(men_shortlists)

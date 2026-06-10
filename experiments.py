@@ -35,12 +35,16 @@ def load_and_average_scores(file_path):
     # return c_avgs + d_avgs + e_avgs + nsw_avgs + c_covs + d_covs + e_covs + nsw_covs  # length 32
     return c_avgs + d_avgs + e_avgs + nsw_avgs
 
-def normalize(alg, max, min):
-    alg_without_nsw = [(a - mn)/(mx-mn) for  a, mx, mn in zip(alg[:-1], max[:-1], min[:-1])]
-    numerator = max[-1] - alg[-1]
-    denominator = max[-1] - min[-1]
-    alg_with_nsw = [numerator / denominator]
-    return alg_without_nsw + alg_with_nsw
+def normalize(alg, maxes, mins):
+    regret = [(alg[0] - mins[0]) / (maxes[0] - mins[0])]
+
+    egalitarian = [(alg[1] - mins[1]) / (maxes[1] - mins[1])]
+
+    sex_equality = [(alg[2] - mins[2]) / (maxes[2] - mins[2])]
+
+    nsw = [(maxes[3] - alg[3]) / (maxes[3] - mins[3])]
+
+    return regret + egalitarian + sex_equality + nsw
 
 def plot_areas(agents, area1_list, area2_list, area3_list, area4_list):
     plt.figure(figsize=(10, 6))
@@ -782,7 +786,7 @@ def plot_circle(n, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, n
     #         pass  # Skip if backend doesn't support window maximizing
     output_folder = "./circle_plots"
     os.makedirs(output_folder, exist_ok=True)
-    filename = f"n={n}_create_preflist_circular_plot2.pdf"
+    filename = f"n={n}_create_preflist_circular_plot.pdf"
     filepath = os.path.join(output_folder, filename)
     plt.savefig(filepath, bbox_inches='tight', format='pdf')
 

@@ -13,8 +13,8 @@ def eg(matching, preflist):
     # calculate summation of ranks
     d_m, d_w, n = 0, 0, len(preflist[0])
     for m, w in enumerate(matching):
-        rank_m = n - preflist[0][m].index(w)
-        rank_w = n - preflist[1][w].index(m)
+        rank_m = preflist[0][m].index(w) + 1
+        rank_w = preflist[1][w].index(m) + 1
         d_m += rank_m
         d_w += rank_w
     return (d_m + d_w)/(2*n)
