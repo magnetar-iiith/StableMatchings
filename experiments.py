@@ -572,10 +572,10 @@ def plot_pairs(n, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, ns
 
 
     plt.tight_layout()
-    plt.suptitle(f'Pairwise Comparison of baseline matchings for n = {n}', fontsize=25)
+    # plt.suptitle(f'Pairwise Comparison of baseline matchings for n = {n}', fontsize=25)
     plt.subplots_adjust(top=0.9)
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='center left', framealpha=0, bbox_to_anchor=(0, 0.5), fontsize=20)
+    fig.legend(handles, labels, loc='center left', framealpha=0, bbox_to_anchor=(0, 0.5), fontsize=10)
     output_folder = "./pareto_plots"
     os.makedirs(output_folder, exist_ok=True)
     filename = f"n={n}_create_preflist_pareto_plot.pdf"
@@ -811,4 +811,4 @@ def plot_bps(agents, avg_bp, avg_ba, max_bp, max_ba, min_bp, min_ba):
     plt.grid(True)
     plt.show()
 
-process_all_files('./')
+process_all_files('./matchings')

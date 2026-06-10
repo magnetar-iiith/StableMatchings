@@ -111,9 +111,9 @@ def execute(num_agents, num_iters):
             min_reg  = float('inf')
             min_eg  = float('inf')
             min_disp  = float('inf')
-            min_nsw  = float('inf')
+            max_nsw  = float('-inf')
             # Reg_closed_subset, Eg_closed_subset, Disp_closed_subset, Snsw_closed_subset = None, None, None, None
-            min_reg_matching, max_eg_matching, min_disp_matching, max_nsw_matching = None, None, None, None
+            min_reg_matching, min_eg_matching, min_disp_matching, max_nsw_matching = None, None, None, None
             for subset in closed_subsets:
                 copy_men_shortlists = copy.deepcopy(men_shortlists)
                 copy_women_shortlists = copy.deepcopy(women_shortlists)
@@ -128,14 +128,14 @@ def execute(num_agents, num_iters):
                     # Reg_closed_subset = subset
                 if egalitarian < min_eg:
                     min_eg = egalitarian
-                    max_eg_matching = matching_1
+                    min_eg_matching = matching_1
                     # Eg_closed_subset = subset
                 if disparity < min_disp:
                     min_disp = disparity
                     min_disp_matching = matching_1
                     # Disp_closed_subset = subset
-                if nash_social_welfare < min_nsw:
-                    min_nsw = nash_social_welfare
+                if nash_social_welfare > max_nsw:
+                    max_nsw = nash_social_welfare
                     max_nsw_matching = matching_1
                     # Snsw_closed_subset = subset
             reg_1 = reg(min_reg_matching, preflist)
@@ -147,13 +147,13 @@ def execute(num_agents, num_iters):
             nsw_1 = nsw(min_reg_matching, preflist)
             # nsw_1_list.append(nsw_1)
 
-            reg_2 = reg(max_eg_matching, preflist)
+            reg_2 = reg(min_eg_matching, preflist)
             # reg_2_list.append(reg_2)
-            eg_2 = eg(max_eg_matching, preflist)
+            eg_2 = eg(min_eg_matching, preflist)
             # eg_2_list.append(eg_2)
-            disp_2 = disp(max_eg_matching, preflist)
+            disp_2 = disp(min_eg_matching, preflist)
             # disp_2_list.append(disp_2)
-            nsw_2 = nsw(max_eg_matching, preflist)
+            nsw_2 = nsw(min_eg_matching, preflist)
             # nsw_2_list.append(nsw_2)
             
             reg_3 = reg(min_disp_matching, preflist)
@@ -176,7 +176,7 @@ def execute(num_agents, num_iters):
             data = {
                 "preflist": convert_to_builtin(preflist),
                 "min_regret": min_reg_matching,
-                "egalitarian": max_eg_matching,
+                "egalitarian": min_eg_matching,
                 "sex_equal": min_disp_matching,
                 "nsw": max_nsw_matching,
                 "scores": {
@@ -196,7 +196,7 @@ def run(n):
 if __name__ == "__main__":
     start_time = time.time()
     with ProcessPoolExecutor() as executor:
-        results = list(executor.map(run, range(5, 51)))
+        results = list(executor.map(run, range(5, 6)))
     end_time = time.time()
     hrs = (end_time - start_time)/3600
     mins = ((end_time - start_time)%3600)/60
