@@ -19,9 +19,9 @@ def load_and_average_scores(file_path):
         for line in f:
             data = json.loads(line)
             for i in range(4):
-                c_scores[i].append(data["scores"]["c"][i])
-                d_scores[i].append(data["scores"]["d"][i])
-                e_scores[i].append(data["scores"]["e"][i])
+                c_scores[i].append(data["scores"]["reg"][i])
+                d_scores[i].append(data["scores"]["eg"][i])
+                e_scores[i].append(data["scores"]["disp"][i])
                 nsw_scores[i].append(data["scores"]["nsw"][i])
 
     c_avgs = [np.mean(c_scores[i]) for i in range(4)]
@@ -62,93 +62,55 @@ def process_all_files(folder_path):
     # ratio_1, ratio_2, ratio_3 = float('inf'), float('inf'), float('inf')
     # area4_list, agents, area3_list, area2_list, area1_list = [], [], [], [], []
     for filename in sorted(os.listdir(folder_path)):
-        if filename.startswith("matchings_25") and filename.endswith(".jsonl"):
-            if "_\\mathcal{U}" not in filename:
-                continue  # Skip anything that doesn’t exactly contain "_\mathcal{U"
+        for n in range(5, 51):
+            if filename.startswith(f"matchings_n={n}") and filename.endswith(".json"):
+                # if "_\\mathcal{U}" not in filename:
+                #     continue  # Skip anything that doesn’t exactly contain "_\mathcal{U"
 
-            # Skip files that contain undesired prefixes like "\mathrm{P}"
-            if "\\mathrm" in filename:
-                continue
-            # if "_\\mathrm{P}_{\\mathcal{N}}" not in filename:
-            #     continue
-            num_agents = int(filename.split("_")[1].split(".")[0])
-            # agents.append(num_agents)
-            file_path = os.path.join(folder_path, filename)
-            scores = load_and_average_scores(file_path)
-            (c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4) = scores
-            plot_pairs(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
-            plot_circle(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
-            alg1 = [c1, d1, e1, nsw1]
-            # regret algo measures
-            alg2 = [c2, d2, e2, nsw2]
-            # egalitarian algo measures
-            alg3 = [c3, d3, e3, nsw3]
-            # sex-equality algo measures
-            alg4 = [c4, d4, e4, nsw4]
-            # NSW algo measures
+                # # Skip files that contain undesired prefixes like "\mathrm{P}"
+                # if "\\mathrm" in filename:
+                #     continue
+                # if "_\\mathrm{P}_{\\mathcal{N}}" not in filename:
+                #     continue
+                num_agents = n
+                # agents.append(num_agents)
+                file_path = os.path.join(folder_path, filename)
+                scores = load_and_average_scores(file_path)
+                (c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4) = scores
+                plot_pairs(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
+                plot_circle(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
 
-            c_max = max(c1, c2, c3, c4)
-            # max regret
-            d_max = max(d1, d2, d3, d4)
-            # max egalitarian
-            e_max = max(e1, e2, e3, e4)
-            # max sex-equality
-            nsw_max = max(nsw1, nsw2, nsw3, nsw4)
-            # max nsw
-            c_min = min(c1, c2, c3, c4)
-            # min regret
-            d_min = min(d1, d2, d3, d4)
-            # min egalitarian
-            e_min = min(e1, e2, e3, e4)
-            # min sex-equality
-            nsw_min = min(nsw1, nsw2, nsw3, nsw4)
-            # min nsw
-            maxes = [c_max, d_max, e_max, nsw_max]
-            # max values of the measures
-            mins = [c_min, d_min, e_min, nsw_min]
-            # min values of the measures
-            # normalization follows
-            alg1 = normalize(alg1, maxes, mins)
-            alg2 = normalize(alg2, maxes, mins)
-            alg3 = normalize(alg3, maxes, mins)
-            alg4 = normalize(alg4, maxes, mins)
+        #         areas = [area1, area2, area3, area4]
+        #         area4_list.append(area4)
+        #         area3_list.append(area3)
+        #         area2_list.append(area2)
+        #         area1_list.append(area1)
+        #         # ratio_1 = min(ratio_1, area1/area4)
+        #         # ratio_2 = min(ratio_2, area2/area4)
+        #         # ratio_3 = min(ratio_3, area3/area4)
+        # # print(f"Max ratio for area1: {ratio_1}, area2: {ratio_2}, area3: {ratio_3}")
+        # sorted_pairs = sorted(zip(agents, area4_list, area3_list, area2_list, area1_list))
+        # agents_sorted, area4_sorted, area3_sorted, area2_sorted, area1_sorted = zip(*sorted_pairs)
+        # agents_sorted = list(agents_sorted)
+        # area4_sorted = list(area4_sorted)
+        # area3_sorted = list(area3_sorted)
+        # area2_sorted = list(area2_sorted)
+        # area1_sorted = list(area1_sorted)
 
-            area1 = 0.5 * alg1[2] * (alg1[1] + alg1[3])
-            area2 = 0.5 * alg2[3] * (alg2[0] + alg2[2])
-            area3 = 0.5 * alg3[0] * (alg3[1] + alg3[3])
-            area4 = 0.5 * alg4[1] * (alg4[0] + alg4[2])
-
-    #         areas = [area1, area2, area3, area4]
-    #         area4_list.append(area4)
-    #         area3_list.append(area3)
-    #         area2_list.append(area2)
-    #         area1_list.append(area1)
-    #         # ratio_1 = min(ratio_1, area1/area4)
-    #         # ratio_2 = min(ratio_2, area2/area4)
-    #         # ratio_3 = min(ratio_3, area3/area4)
-    # # print(f"Max ratio for area1: {ratio_1}, area2: {ratio_2}, area3: {ratio_3}")
-    # sorted_pairs = sorted(zip(agents, area4_list, area3_list, area2_list, area1_list))
-    # agents_sorted, area4_sorted, area3_sorted, area2_sorted, area1_sorted = zip(*sorted_pairs)
-    # agents_sorted = list(agents_sorted)
-    # area4_sorted = list(area4_sorted)
-    # area3_sorted = list(area3_sorted)
-    # area2_sorted = list(area2_sorted)
-    # area1_sorted = list(area1_sorted)
-
-    # plot_areas(agents_sorted, area1_sorted, area2_sorted, area3_sorted, area4_sorted)
-            # # Unpack scores to individual variables if needed
-            # (c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4, \
-            #  C1, C2, C3, C4, D1, D2, D3, D4, E1, E2, E3, E4, NSW1, NSW2, NSW3, NSW4) = scores
-            
-            # if num_agents == 50:
-                # # print all values
-                # print(f"{c1}({C1}), {c2}({C2}), {c3}({C3}), {c4}({C4})")
-                # print(f"{d1}({D1}), {d2}({D2}), {d3}({D3}), {d4}({D4})")
-                # print(f"{e1}({E1}), {e2}({E2}), {e3}({E3}), {e4}({E4})")
-                # print(f"{nsw1}({NSW1}), {nsw2}({NSW2}), {nsw3}({NSW3}), {nsw4}({NSW4})")
-                # # Replace this with your plotting function call
-                # print(f"Calling plot for {num_agents} agents:")
-                # plot_pairs(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
+        # plot_areas(agents_sorted, area1_sorted, area2_sorted, area3_sorted, area4_sorted)
+                # # Unpack scores to individual variables if needed
+                # (c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4, \
+                #  C1, C2, C3, C4, D1, D2, D3, D4, E1, E2, E3, E4, NSW1, NSW2, NSW3, NSW4) = scores
+                
+                # if num_agents == 50:
+                    # # print all values
+                    # print(f"{c1}({C1}), {c2}({C2}), {c3}({C3}), {c4}({C4})")
+                    # print(f"{d1}({D1}), {d2}({D2}), {d3}({D3}), {d4}({D4})")
+                    # print(f"{e1}({E1}), {e2}({E2}), {e3}({E3}), {e4}({E4})")
+                    # print(f"{nsw1}({NSW1}), {nsw2}({NSW2}), {nsw3}({NSW3}), {nsw4}({NSW4})")
+                    # # Replace this with your plotting function call
+                    # print(f"Calling plot for {num_agents} agents:")
+                    # plot_pairs(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
 
 
 # def plot_worst_ranks(agents, c_1_avg, c_2_avg, c_3_avg, c_1_var, c_2_var, c_3_var):
@@ -610,7 +572,11 @@ def plot_pairs(n, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, ns
     plt.subplots_adjust(top=0.9)
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='center left', framealpha=0, bbox_to_anchor=(0, 0.5), fontsize=20)
-    plt.show()
+    output_folder = "./pareto_plots"
+    os.makedirs(output_folder, exist_ok=True)
+    filename = f"n={n}_create_preflist_pareto_plot.pdf"
+    filepath = os.path.join(output_folder, filename)
+    plt.savefig(filepath, bbox_inches='tight', format='pdf')
 
 def padded_limits(data, pad_ratio=0.05):
     dmin, dmax = min(data), max(data)
@@ -814,12 +780,11 @@ def plot_circle(n, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, n
     #         mng.window.showMaximized()  # For Qt backend
     #     except:
     #         pass  # Skip if backend doesn't support window maximizing
-    plt.show()
-    # output_folder = "./exps4"
-    # os.makedirs(output_folder, exist_ok=True)
-    # filename = f"{n}_popularity_normal_circular_plot.pdf"
-    # filepath = os.path.join(output_folder, filename)
-    # plt.savefig(filepath, bbox_inches='tight', format='pdf')
+    output_folder = "./circle_plots"
+    os.makedirs(output_folder, exist_ok=True)
+    filename = f"n={n}_create_preflist_circular_plot2.pdf"
+    filepath = os.path.join(output_folder, filename)
+    plt.savefig(filepath, bbox_inches='tight', format='pdf')
 
 def plot_bps(agents, avg_bp, avg_ba, max_bp, max_ba, min_bp, min_ba):
     plt.figure(figsize=(10, 6))
@@ -842,4 +807,4 @@ def plot_bps(agents, avg_bp, avg_ba, max_bp, max_ba, min_bp, min_ba):
     plt.grid(True)
     plt.show()
 
-# process_all_files('./matchings/')
+process_all_files('./')

@@ -10,10 +10,9 @@ from shortlists import create_shortlists, print_shortlists
 from rotations import find_a_rotation, eliminate_rotation, print_rotations
 from graph_construction import closed_subset_finder, create_rotation_digraph, print_graph, predecessors, topological_sort, assign_weights, print_weights, max_weight_subset_1, max_weight_subset_2, stable_matching
 from measures import reg, eg, disp, nsw, statistics
-from experiments import plot_3d, plot_circle, plot_bps, plot_regret, plot_egalitarian, plot_disparity, plot_nsw, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, plot_pairs
 from concurrent.futures import ProcessPoolExecutor
 from itertools import permutations, product
-from time import time
+import time
 np.random.seed(69)
 
 def convert_to_builtin(obj):
