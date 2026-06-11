@@ -3,11 +3,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import Circle
 from matplotlib.patches import Ellipse
 import numpy as np
-import random
 import json
 import os
-
-random.seed(42)
 
 def load_and_average_scores(file_path):
     c_scores = [[] for _ in range(4)]
@@ -170,83 +167,6 @@ def process_all_files(folder_path):
 #     plt.legend(fontsize=20)
 #     plt.grid(True)
 #     plt.show()
-
-def popularity_dist_uniform(popularity):
-    for i in range(len(popularity)):
-        popularity[i] = np.random.uniform(0, 1)
-    return popularity
-
-def popularity_dist_triangular(popularity):
-    for i in range(len(popularity)):
-        popularity[i] = np.random.triangular(0, 0.5, 1)
-    return popularity
-
-def popularity_dist_half_normal(popularity):
-    for i in range(len(popularity)):
-        popularity[i] = np.abs(np.random.normal(0, 1))
-    return popularity
-
-def ranklist_generator(popularity, available, ranklist):
-    if len(available) == 0:
-        return
-    probabilites = [popularity[i] for i in available]
-    selected_person = random.choices(available, weights=probabilites/np.sum(probabilites), k = 1)
-    ranklist.append(selected_person[0])
-    i = np.where(available == selected_person[0])[0][0]
-    available = np.delete(available, i)
-    ranklist_generator(popularity, available, ranklist)
-    return
-
-def uniform_instance_generator(n):
-    # Generate a random instance with n agents
-    preflist = [[], []]
-    popularity_men = np.zeros(n)
-    popularity_women = np.zeros(n)
-    popularity_dist_uniform(popularity_men)
-    popularity_dist_uniform(popularity_women)
-    available_men, available_women = np.arange(n), np.arange(n)
-    for i in range(n):
-        # decide preflist[0][i] and preflist[1][i]
-        ranklist_1, ranklist_2 = [], []
-        ranklist_generator(popularity_men, available_women, ranklist_1)
-        ranklist_generator(popularity_women, available_men, ranklist_2)
-        preflist[0].append(ranklist_1)
-        preflist[1].append(ranklist_2)
-    return preflist
-
-def triangular_instance_generator(n):
-    # Generate a random instance with n agents
-    preflist = [[], []]
-    popularity_men = np.zeros(n)
-    popularity_women = np.zeros(n)
-    popularity_dist_triangular(popularity_men)
-    popularity_dist_triangular(popularity_women)
-    available_men, available_women = np.arange(n), np.arange(n)
-    for i in range(n):
-        # decide preflist[0][i] and preflist[1][i]
-        ranklist_1, ranklist_2 = [], []
-        ranklist_generator(popularity_men, available_women, ranklist_1)
-        ranklist_generator(popularity_women, available_men, ranklist_2)
-        preflist[0].append(ranklist_1)
-        preflist[1].append(ranklist_2)
-    return preflist
-
-def normal_instance_generator(n):
-    # Generate a random instance with n agents
-    preflist = [[], []]
-    popularity_men = np.zeros(n)
-    popularity_women = np.zeros(n)
-    popularity_dist_half_normal(popularity_men)
-    popularity_dist_half_normal(popularity_women)
-    available_men, available_women = np.arange(n), np.arange(n)
-    for i in range(n):
-        # decide preflist[0][i] and preflist[1][i]
-        ranklist_1, ranklist_2 = [], []
-        ranklist_generator(popularity_men, available_women, ranklist_1)
-        ranklist_generator(popularity_women, available_men, ranklist_2)
-        preflist[0].append(ranklist_1)
-        preflist[1].append(ranklist_2)
-    return preflist
 
 # Helper function to draw directional arrow labeled "better"
 def draw_arrow_nsw(ax, direction='horizontal'):

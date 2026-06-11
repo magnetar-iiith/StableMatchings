@@ -1,4 +1,8 @@
 import numpy as np
+from itertools import permutations, product
+import random
+
+random.seed(42)
 
 def print_ranklist(ranklist):
     # ranklist means preference 
@@ -79,3 +83,91 @@ def print_weight_matrix(weight_matrix):
     for row in weight_matrix:
         # print upto 2 decimals accuracy
         print(["{:.2f}".format(x) for x in row])
+
+def popularity_dist_uniform(popularity):
+    for i in range(len(popularity)):
+        popularity[i] = np.random.uniform(0, 1)
+    return popularity
+
+def popularity_dist_triangular(popularity):
+    for i in range(len(popularity)):
+        popularity[i] = np.random.triangular(0, 0.5, 1)
+    return popularity
+
+def popularity_dist_half_normal(popularity):
+    for i in range(len(popularity)):
+        popularity[i] = np.abs(np.random.normal(0, 1))
+    return popularity
+
+def ranklist_generator(popularity, available, ranklist):
+    if len(available) == 0:
+        return
+    probabilites = [popularity[i] for i in available]
+    selected_person = random.choices(available, weights=probabilites/np.sum(probabilites), k = 1)
+    ranklist.append(selected_person[0])
+    i = np.where(available == selected_person[0])[0][0]
+    available = np.delete(available, i)
+    ranklist_generator(popularity, available, ranklist)
+    return
+
+def uniform_instance_generator(n):
+    # Generate a random instance with n agents
+    preflist = [[], []]
+    popularity_men = np.zeros(n)
+    popularity_women = np.zeros(n)
+    popularity_dist_uniform(popularity_men)
+    popularity_dist_uniform(popularity_women)
+    available_men, available_women = np.arange(n), np.arange(n)
+    for i in range(n):
+        # decide preflist[0][i] and preflist[1][i]
+        ranklist_1, ranklist_2 = [], []
+        ranklist_generator(popularity_men, available_women, ranklist_1)
+        ranklist_generator(popularity_women, available_men, ranklist_2)
+        preflist[0].append(ranklist_1)
+        preflist[1].append(ranklist_2)
+    return preflist
+
+def triangular_instance_generator(n):
+    # Generate a random instance with n agents
+    preflist = [[], []]
+    popularity_men = np.zeros(n)
+    popularity_women = np.zeros(n)
+    popularity_dist_triangular(popularity_men)
+    popularity_dist_triangular(popularity_women)
+    available_men, available_women = np.arange(n), np.arange(n)
+    for i in range(n):
+        # decide preflist[0][i] and preflist[1][i]
+        ranklist_1, ranklist_2 = [], []
+        ranklist_generator(popularity_men, available_women, ranklist_1)
+        ranklist_generator(popularity_women, available_men, ranklist_2)
+        preflist[0].append(ranklist_1)
+        preflist[1].append(ranklist_2)
+    return preflist
+
+def normal_instance_generator(n):
+    # Generate a random instance with n agents
+    preflist = [[], []]
+    popularity_men = np.zeros(n)
+    popularity_women = np.zeros(n)
+    popularity_dist_half_normal(popularity_men)
+    popularity_dist_half_normal(popularity_women)
+    available_men, available_women = np.arange(n), np.arange(n)
+    for i in range(n):
+        # decide preflist[0][i] and preflist[1][i]
+        ranklist_1, ranklist_2 = [], []
+        ranklist_generator(popularity_men, available_women, ranklist_1)
+        ranklist_generator(popularity_women, available_men, ranklist_2)
+        preflist[0].append(ranklist_1)
+        preflist[1].append(ranklist_2)
+    return preflist
+
+def generate_matchings(n):
+    yield from permutations(range(n))    
+
+def generate_instances(n):
+    prefs = list(permutations(range(n)))
+
+    for profile in product(prefs, repeat=2*n):
+        men = [list(profile[i]) for i in range(n)]
+        women = [list(profile[i]) for i in range(n, 2*n)]
+        yield [men, women]
