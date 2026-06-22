@@ -1,11 +1,16 @@
+"""This module finds the man optimal matching
+    via the Gale-Shapley Algorithm"""
+
 import numpy as np
 
 def print_matching(matching):
+    """Prints matching"""
     for man, woman in enumerate(matching):
         print("Man", man, "is matched with Woman", woman)
         # print the marriage
 
 def gale_shapley(preflist):
+    """Executes Gale-Shapley Algorithm"""
     proposer_ranklist = preflist[0]
     # preference list of the proposer (men)
     rejector_ranklist = preflist[1]
@@ -22,22 +27,22 @@ def gale_shapley(preflist):
     to_be_proposed = np.zeros(num_agents, dtype=int)
     # index of next rejector in proposers preference
     # list to be proposed by each proposer
-    
+
     # Some preprocessing of ranks
     rejector_preferences = np.zeros((num_agents, num_agents), dtype=int)
-    # rank of each proposer in the 
+    # rank of each proposer in the
     # preference list of each rejector
     for rejector in range(num_agents):
         # iterating over rejectors
         for rank, proposer in enumerate(rejector_ranklist[rejector]):
-            # iterating over proposers in the 
+            # iterating over proposers in the
             # rejector's preference list
             rejector_preferences[rejector][proposer] = rank
-            # assigning a rank to each proposer in 
+            # assigning a rank to each proposer in
             # rejector's preference list
 
     while free_proposers:
-        proposer = free_proposers.pop(0) 
+        proposer = free_proposers.pop(0)
         # Get the first free proposer
         rejector = proposer_ranklist[proposer][to_be_proposed[proposer]]
         # get the next rejector that proposer
@@ -78,7 +83,7 @@ def gale_shapley(preflist):
                 # print the rejection
                 free_proposers.append(proposer)
                 # proposer is again free
-                # need to add back as he was 
+                # need to add back as he was
                 # popped out of the list
         to_be_proposed[proposer] += 1
         # increase index of rejector to be proposed next
@@ -87,6 +92,7 @@ def gale_shapley(preflist):
     # return the result
 
 def blocking_pairs(matching, preflist):
+    """Returns all blocking pairs"""
     num_agents = len(matching)
     blockingpairs = []
     reverse_matching = [-1] * num_agents
@@ -94,7 +100,7 @@ def blocking_pairs(matching, preflist):
         reverse_matching[matching[m_i]] = m_i
     for m_i in range(num_agents):
         for w_j in range(num_agents):
-            bp = (m_i, w_j)
+            blocking_pair = (m_i, w_j)
             if matching[m_i] == w_j:
                 # if i is matched with j, skip
                 continue
@@ -107,6 +113,6 @@ def blocking_pairs(matching, preflist):
                 wr_w_j_m_j = preflist[1][w_j].index(m_j)
                 if mr_m_i_w_j < mr_m_i_w_i:
                     if wr_w_j_m_i < wr_w_j_m_j:
-                        blockingpairs.append(bp)
+                        blockingpairs.append(blocking_pair)
 
     return blockingpairs

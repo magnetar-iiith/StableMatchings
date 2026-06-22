@@ -28,5 +28,5 @@ def find_worst_ratio(folder_path):
             print(len(preflist[0]))
             print(ratio_min)
 
-folder_path = "paper_matchings/OneDrive_1_12-06-2026/"
+folder_path = "exhaustive_search/"
 find_worst_ratio(folder_path)

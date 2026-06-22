@@ -1,40 +1,42 @@
+"""This creates shortlists"""
+
 import copy
 
 def print_shortlists(shortlist):
-    # print mens or womens shortlist
+    """prints mens or womens shortlist"""
     for i, preferences in enumerate(shortlist):
         # print reduced preference list
-        # of each agent 
+        # of each agent
         print("Shortlist of Agent", i, ":", preferences)
         # prints the preferences
 
 def create_shortlists(preflist, matching):
-    # given the original preference list
-    # and men optimal matching
-    # create the man-oriented shortlists
+    """given the original preference list
+    and men optimal matching
+    create the man-oriented shortlists"""
     num_agents = len(preflist[0])
     # number of agents
     men_shortlists = copy.deepcopy(preflist[0])
     women_shortlists = copy.deepcopy(preflist[1])
 
-    for m, w in enumerate(matching):
+    for man, woman in enumerate(matching):
         # iterating over the couples
-        idx = women_shortlists[w].index(m) 
-        # idx is rank of man m in woman w's 
-        # preference list                                                      
-        women_shortlists[w] = women_shortlists[w][:idx + 1]
-        # women w's reduced preference list
-        # is all men beore and including m
+        idx = women_shortlists[woman].index(man)
+        # idx is rank of man in woman's
+        # preference list
+        women_shortlists[woman] = women_shortlists[woman][:idx + 1]
+        # women woman's reduced preference list
+        # is all men before and including man
 
-    for m in range(num_agents):
+    for man in range(num_agents):
         # iterating over all men
-        for w in men_shortlists[m][:]:
-            # iterating over all women w 
-            # in man m's shortlist
-            if m not in women_shortlists[w]:
-                # If m is not in w's shortlist
-                men_shortlists[m].remove(w)
-                # remove w from m's shortlist
+        for woman in men_shortlists[man][:]:
+            # iterating over all women woman
+            # in man's shortlist
+            if man not in women_shortlists[woman]:
+                # If man is not in woman's shortlist
+                men_shortlists[man].remove(woman)
+                # remove woman from man's shortlist
 
     return men_shortlists, women_shortlists
 # return the reduced preference lists called as shortlists

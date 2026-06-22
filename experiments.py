@@ -64,7 +64,9 @@ def process_all_files(folder_path):
     # area4_list, agents, area3_list, area2_list, area1_list = [], [], [], [], []
     for filename in sorted(os.listdir(folder_path)):
         for n in range(5, 51):
-            if filename.startswith(f"matchings_n={n}") and filename.endswith(".json"):
+            # if filename.startswith(f"Uniform matchings_n={n}") and filename.endswith(".json"):
+            # if filename.startswith(f"train matchings_n={n}") and filename.endswith(".json"):
+            if filename.startswith(f"normal matchings_n={n}") and filename.endswith(".json"):
                 # if "_\\mathcal{U}" not in filename:
                 #     continue  # Skip anything that doesn’t exactly contain "_\mathcal{U"
 
@@ -78,7 +80,7 @@ def process_all_files(folder_path):
                 file_path = os.path.join(folder_path, filename)
                 scores = load_and_average_scores(file_path)
                 (c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4) = scores
-                plot_pairs(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
+                # plot_pairs(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
                 plot_circle(num_agents, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, nsw3, nsw4)
 
         #         areas = [area1, area2, area3, area4]
@@ -706,7 +708,9 @@ def plot_circle(n, c1, c2, c3, c4, d1, d2, d3, d4, e1, e2, e3, e4, nsw1, nsw2, n
     #         pass  # Skip if backend doesn't support window maximizing
     output_folder = "./circle_plots"
     os.makedirs(output_folder, exist_ok=True)
-    filename = f"n={n}_create_preflist_circular_plot.pdf"
+    # filename = f"n={n}_uniform_circular_plot.pdf"
+    # filename = f"n={n}_triangular_circular_plot.pdf"
+    filename = f"n={n}_normal_circular_plot.pdf"
     filepath = os.path.join(output_folder, filename)
     plt.savefig(filepath, bbox_inches='tight', format='pdf')
 
@@ -731,4 +735,4 @@ def plot_bps(agents, avg_bp, avg_ba, max_bp, max_ba, min_bp, min_ba):
     plt.grid(True)
     plt.show()
 
-process_all_files('./matchings')
+process_all_files('./paper_matchings/OneDrive_1_12-06-2026')
