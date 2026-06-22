@@ -1,7 +1,7 @@
 import numpy as np
 from dataset_generator import create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, generate_instances
 from find_matchings import routine
-from data_processor_chatgpt import data_processor
+#from data_processor_chatgpt import data_processor
 from concurrent.futures import ProcessPoolExecutor
 import time
 import os
@@ -59,7 +59,10 @@ def execute(num_agents, num_iters):
             routine(preflist, results_file)
 
 ratio_min = float('inf')
+iter = 0
 def instance_search(preflist, folder_path):
+    if iter%1000 == 0:
+        print(iter)
     libc = ctypes.CDLL("libc.so.6")
     cpu = libc.sched_getcpu()
     filename = f"matchings_n=4_processor={cpu}.json"
