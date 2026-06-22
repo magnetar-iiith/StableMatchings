@@ -105,7 +105,7 @@ def real_world_dataset():
 
 def run(n):
     print(f"Number of Agents = {n}") 
-    execute(n, 100)
+    execute(n, 1000000)
 
 def run_2(num_agents):
     print(f"Num agents = {num_agents}")
@@ -115,9 +115,9 @@ def run_2(num_agents):
 if __name__ == "__main__":
     # real_world_dataset()
     start_time = time.time()
-    run_2(num_agents=4)
-    # with ProcessPoolExecutor() as executor:
-    #     results = list(executor.map(run, range(4, 5)))
+    # run_2(num_agents=4)
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(run, range(4, 5)))
     end_time = time.time()
     hrs = (end_time - start_time)/3600
     mins = ((end_time - start_time)%3600)/60
