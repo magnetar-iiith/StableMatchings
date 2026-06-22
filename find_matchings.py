@@ -114,5 +114,5 @@ def routine(preflist, results_file):
             "nsw": [float(nash_welfare_1), float(nash_welfare_2), float(nash_welfare_3), float(nash_welfare_4)]
         }
     }
-    # return convert_to_builtin(data), egalitarian_4 / egalitarian_2
-    results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
+    return convert_to_builtin(data), egalitarian_4 / egalitarian_2
+    # results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
