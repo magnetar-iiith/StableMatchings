@@ -64,7 +64,7 @@ def instance_search(preflist, folder_path):
     libc = ctypes.CDLL("libc.so.6")
     global ratio_min
     global i
-    if i % 1000 == 0:
+    if i % 10000 == 0:
         print(i)
     cpu = libc.sched_getcpu()
     filename = f"matchings_n=4_processor={cpu}.json"
@@ -75,6 +75,7 @@ def instance_search(preflist, folder_path):
         ratio_min = ratio_curr
         with open(filepath, 'w') as results_file:
             results_file.write(json.dumps(line))
+    i += 1
 
 def exhaustive_search(num_agents):
     """Generates all instances of size num_agents
