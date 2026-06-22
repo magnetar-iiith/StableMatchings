@@ -82,25 +82,25 @@ def routine(preflist, results_file):
         if nash_welfare_val > max_nash_welfare:
             max_nash_welfare = nash_welfare_val
             max_nash_welfare_matching = matching_1
-    regret_1 = regret(min_regret_matching, preflist)
-    egalitarian_1 = egalitarian(min_regret_matching, preflist)
-    disparity_1 = disparity(min_regret_matching, preflist)
-    nash_welfare_1 = nash_welfare(min_regret_matching, preflist)
+    # regret_1 = regret(min_regret_matching, preflist)
+    # egalitarian_1 = egalitarian(min_regret_matching, preflist)
+    # disparity_1 = disparity(min_regret_matching, preflist)
+    # nash_welfare_1 = nash_welfare(min_regret_matching, preflist)
 
-    regret_2 = regret(min_egalitarian_matching, preflist)
+    # regret_2 = regret(min_egalitarian_matching, preflist)
     egalitarian_2 = egalitarian_welfare(min_egalitarian_matching, preflist)
-    disparity_2 = disparity(min_egalitarian_matching, preflist)
-    nash_welfare_2 = nash_welfare(min_egalitarian_matching, preflist)
+    # disparity_2 = disparity(min_egalitarian_matching, preflist)
+    # nash_welfare_2 = nash_welfare(min_egalitarian_matching, preflist)
     
-    regret_3 = regret(min_disparity_matching, preflist)
-    egalitarian_3 = egalitarian(min_disparity_matching, preflist)
-    disparity_3 = disparity(min_disparity_matching, preflist)
-    nash_welfare_3 = nash_welfare(min_disparity_matching, preflist)
+    # regret_3 = regret(min_disparity_matching, preflist)
+    # egalitarian_3 = egalitarian(min_disparity_matching, preflist)
+    # disparity_3 = disparity(min_disparity_matching, preflist)
+    # nash_welfare_3 = nash_welfare(min_disparity_matching, preflist)
 
-    regret_4 = regret(max_nash_welfare_matching, preflist)
+    # regret_4 = regret(max_nash_welfare_matching, preflist)
     egalitarian_4 = egalitarian_welfare(max_nash_welfare_matching, preflist)
-    disparity_4 = disparity(max_nash_welfare_matching, preflist)
-    nash_welfare_4 = nash_welfare(max_nash_welfare_matching, preflist)
+    # disparity_4 = disparity(max_nash_welfare_matching, preflist)
+    # nash_welfare_4 = nash_welfare(max_nash_welfare_matching, preflist)
     data = {
         "preflist": convert_to_builtin(preflist),
         "min_regret": min_regret_matching,
@@ -108,10 +108,11 @@ def routine(preflist, results_file):
         "sex_equal": min_disparity_matching,
         "nsw": max_nash_welfare_matching,
         "scores": {
-            "reg": [float(regret_1), float(regret_2), float(regret_3), float(regret_4)],
-            "eg": [float(egalitarian_1), float(egalitarian_2), float(egalitarian_3), float(egalitarian_4)],
-            "disp": [float(disparity_1), float(disparity_2), float(disparity_3), float(disparity_4)],
-            "nsw": [float(nash_welfare_1), float(nash_welfare_2), float(nash_welfare_3), float(nash_welfare_4)]
+            # "reg": [float(regret_1), float(regret_2), float(regret_3), float(regret_4)],
+            # "eg": [float(egalitarian_1), float(egalitarian_2), float(egalitarian_3), float(egalitarian_4)],
+            # "disp": [float(disparity_1), float(disparity_2), float(disparity_3), float(disparity_4)],
+            # "nsw": [float(nash_welfare_1), float(nash_welfare_2), float(nash_welfare_3), float(nash_welfare_4)]
+            "mueemuensw" : [float(egalitarian_2), float(egalitarian_4)]
         }
     }
     return convert_to_builtin(data), egalitarian_4 / egalitarian_2
