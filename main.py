@@ -63,6 +63,9 @@ i = 0
 def instance_search(preflist, folder_path):
     libc = ctypes.CDLL("libc.so.6")
     global ratio_min
+    global i
+    if i % 1000 == 0:
+        print(i)
     cpu = libc.sched_getcpu()
     filename = f"matchings_n=4_processor={cpu}.json"
     filepath = os.path.join(folder_path, filename)
