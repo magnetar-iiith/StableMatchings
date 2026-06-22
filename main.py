@@ -1,10 +1,13 @@
 import numpy as np
-from dataset_generator import create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator
+from dataset_generator import create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, generate_instances
 from find_matchings import routine
 from data_processor_chatgpt import data_processor
 from concurrent.futures import ProcessPoolExecutor
 import time
 import os
+from itertools import repeat
+import ctypes
+import json
 np.random.seed(69)
 
 # alg_1 is for min regret optimal algorithm
@@ -54,7 +57,30 @@ def execute(num_agents, num_iters):
                 print(iter)
             preflist = normal_instance_generator(num_agents)
             routine(preflist, results_file)
-            
+
+ratio_min = float('inf')
+def instance_search(preflist, folder_path):
+    libc = ctypes.CDLL("libc.so.6")
+    cpu = libc.sched_getcpu()
+    filename = f"matchings_n=4_processor={cpu}.json"
+    filepath = os.path.join(folder_path, filename)
+    # preflist = instances[i]
+    line, ratio_curr = routine(preflist, results_file=filepath)
+    if ratio_curr < ratio_min:
+        ratio_min = ratio_curr
+        with open(filepath, 'w') as results_file:
+            results_file.write(json.dumps(line))
+
+def exhaustive_search(num_agents):
+    """Generates all instances of size num_agents
+       and saves the results in a file"""
+    folder_path = "exhaustive_search/"
+    os.makedirs(folder_path, exist_ok=True)
+
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(instance_search,
+                generate_instances(num_aqents=num_agents),repeat(folder_path),))
+
 def real_world_dataset():
     output_folder = "./real_world_exps"
     os.makedirs(output_folder, exist_ok=True)
@@ -75,11 +101,17 @@ def run(n):
     print(f"Number of Agents = {n}") 
     execute(n, 100)
 
+def run_2(num_agents):
+    print(f"Num agents = {num_agents}")
+    exhaustive_search(num_agents=num_agents)
+
+
 if __name__ == "__main__":
     # real_world_dataset()
     start_time = time.time()
-    with ProcessPoolExecutor() as executor:
-        results = list(executor.map(run, range(5, 6)))
+    run_2(num_agents=2)
+    # with ProcessPoolExecutor() as executor:
+    #     results = list(executor.map(run, range(4, 5)))
     end_time = time.time()
     hrs = (end_time - start_time)/3600
     mins = ((end_time - start_time)%3600)/60
