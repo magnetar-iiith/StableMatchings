@@ -21,42 +21,42 @@ np.random.seed(69)
 
 def execute(num_agents, num_iters):
     output_folder_1 = "./matchings-uniform"
-    output_folder_2 = "./matchings-uniform_popularity"
-    output_folder_3 = "./matchings-triangular_popularity"
-    output_folder_4 = "./matchings-normal_popularity"
+    # output_folder_2 = "./matchings-uniform_popularity"
+    # output_folder_3 = "./matchings-triangular_popularity"
+    # output_folder_4 = "./matchings-normal_popularity"
     os.makedirs(output_folder_1, exist_ok=True)
-    os.makedirs(output_folder_2, exist_ok=True)
-    os.makedirs(output_folder_3, exist_ok=True)
-    os.makedirs(output_folder_4, exist_ok=True)
+    # os.makedirs(output_folder_2, exist_ok=True)
+    # os.makedirs(output_folder_3, exist_ok=True)
+    # os.makedirs(output_folder_4, exist_ok=True)
     filename = f"matchings_n={num_agents}_iters={num_iters}.json"
     filepath_1 = os.path.join(output_folder_1, filename)
-    filepath_2 = os.path.join(output_folder_2, filename)
-    filepath_3 = os.path.join(output_folder_3, filename)
-    filepath_4 = os.path.join(output_folder_4, filename)
+    # filepath_2 = os.path.join(output_folder_2, filename)
+    # filepath_3 = os.path.join(output_folder_3, filename)
+    # filepath_4 = os.path.join(output_folder_4, filename)
     with open(filepath_1, 'w') as results_file:
         for iter in range(num_iters):
             if iter % 20000 == 0:
                 print(iter)
             preflist = create_preflist(num_agents)
             routine(preflist, results_file)
-    with open(filepath_2, 'w') as results_file:
-        for iter in range(num_iters):
-            if iter % 20000 == 0:
-                print(iter)
-            preflist = uniform_instance_generator(num_agents)
-            routine(preflist, results_file)
-    with open(filepath_3, 'w') as results_file:
-        for iter in range(num_iters):
-            if iter % 20000 == 0:
-                print(iter)
-            preflist = triangular_instance_generator(num_agents)
-            routine(preflist, results_file)
-    with open(filepath_4, 'w') as results_file:
-        for iter in range(num_iters):
-            if iter % 20000 == 0:
-                print(iter)
-            preflist = normal_instance_generator(num_agents)
-            routine(preflist, results_file)
+    # with open(filepath_2, 'w') as results_file:
+    #     for iter in range(num_iters):
+    #         if iter % 20000 == 0:
+    #             print(iter)
+    #         preflist = uniform_instance_generator(num_agents)
+    #         routine(preflist, results_file)
+    # with open(filepath_3, 'w') as results_file:
+    #     for iter in range(num_iters):
+    #         if iter % 20000 == 0:
+    #             print(iter)
+    #         preflist = triangular_instance_generator(num_agents)
+    #         routine(preflist, results_file)
+    # with open(filepath_4, 'w') as results_file:
+    #     for iter in range(num_iters):
+    #         if iter % 20000 == 0:
+    #             print(iter)
+    #         preflist = normal_instance_generator(num_agents)
+    #         routine(preflist, results_file)
 
 ratio_min = float('inf')
 i = 0
