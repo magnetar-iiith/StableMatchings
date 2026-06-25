@@ -3,6 +3,8 @@ from dataset_generator import create_preflist, create_preference_list, uniform_i
 from find_matchings import routine
 from data_processor_chatgpt import data_processor
 from concurrent.futures import ProcessPoolExecutor
+from itertools import islice
+from multiprocessing import Pool
 import time
 import os
 from itertools import repeat
@@ -58,34 +60,17 @@ def execute(num_agents, num_iters):
     #         preflist = normal_instance_generator(num_agents)
     #         routine(preflist, results_file)
 
-ratio_min = float('inf')
-i = 0
-def instance_search(preflist, folder_path):
-    libc = ctypes.CDLL("libc.so.6")
-    global ratio_min
-    global i
-    print(i)
-    # if i % 10000 == 0:
-    cpu = libc.sched_getcpu()
-    filename = f"matchings_n=4_processor={cpu}.json"
-    filepath = os.path.join(folder_path, filename)
-    # preflist = instances[i]
-    line, ratio_curr = routine(preflist, results_file=filepath)
-    i += 1
-    if ratio_curr < ratio_min:
-        ratio_min = ratio_curr
-        with open(filepath, 'w') as results_file:
-            results_file.write(json.dumps(line))
-
-def exhaustive_search(num_agents):
-    """Generates all instances of size num_agents
-       and saves the results in a file"""
-    folder_path = "exhaustive_search/"
-    os.makedirs(folder_path, exist_ok=True)
-
-    with ProcessPoolExecutor() as executor:
-        results = list(executor.map(instance_search,
-                generate_instances(num_aqents=num_agents),repeat(folder_path),))
+def worker(args):
+    worker_id, num_workers, num_agents = args
+    foldername = "latest_worst_ratio/"
+    os.makedirs(foldername, exist_ok=True)
+    filename = f"matchings_{num_agents}_worst_ratio_{worker_id}.json"
+    filepath = os.path.join(foldername, filename)
+    ratio_min = float('inf')
+    for idx, instance in enumerate(generate_instances(num_agents)):
+        if idx % num_workers == worker_id:
+            ratio_min = routine(instance, filepath, ratio_min)
+    
 
 def real_world_dataset():
     output_folder = "./real_world_exps"
@@ -107,15 +92,16 @@ def run(n):
     print(f"Number of Agents = {n}") 
     execute(n, 1000000)
 
-def run_2(num_agents):
-    print(f"Num agents = {num_agents}")
-    exhaustive_search(num_agents=num_agents)
-
-
 if __name__ == "__main__":
     # real_world_dataset()
     start_time = time.time()
-    # run_2(num_agents=4)
+    # num_agents = 4
+    # num_workers = os.cpu_count()
+    # with Pool(num_workers) as pool:
+    #     pool.map(
+    #         worker,
+    #         [(i, num_workers, num_agents) for i in range(num_workers)]
+    #     )
     with ProcessPoolExecutor() as executor:
         results = list(executor.map(run, range(4, 5)))
     end_time = time.time()
