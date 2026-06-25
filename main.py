@@ -35,12 +35,13 @@ def execute(num_agents, num_iters):
     # filepath_2 = os.path.join(output_folder_2, filename)
     # filepath_3 = os.path.join(output_folder_3, filename)
     # filepath_4 = os.path.join(output_folder_4, filename)
-    with open(filepath_1, 'w') as results_file:
-        for iter in range(num_iters):
-            if iter % 20000 == 0:
-                print(iter)
-            preflist = create_preflist(num_agents)
-            routine(preflist, results_file)
+    ratio_min = float('inf')
+    # with open(filepath_1, 'w') as results_file:
+    for iter in range(num_iters):
+        if iter % 20000 == 0:
+            print(iter)
+        preflist = create_preflist(num_agents)
+        ratio_min = routine(preflist, filepath_1, ratio_min)
     # with open(filepath_2, 'w') as results_file:
     #     for iter in range(num_iters):
     #         if iter % 20000 == 0:
