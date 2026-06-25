@@ -24,7 +24,7 @@ def convert_to_builtin(obj):
     else:
         return obj
     
-def routine(preflist, results_file):
+def routine(preflist, filepath, ratio_min):
     """Finds min-regret, egalitarian, sex-equal,
      and snsw stable matchings"""   
     male_optimal_matching = gale_shapley(preflist)
@@ -98,6 +98,7 @@ def routine(preflist, results_file):
     egalitarian_4 = egalitarian_welfare(max_nash_welfare_matching, preflist)
     # disparity_4 = disparity(max_nash_welfare_matching, preflist)
     # nash_welfare_4 = nash_welfare(max_nash_welfare_matching, preflist)
+    ratio_curr = egalitarian_4 / egalitarian_2
     data = {
         "preflist": convert_to_builtin(preflist),
         # "min_regret": min_regret_matching,
@@ -109,8 +110,13 @@ def routine(preflist, results_file):
             # "eg": [float(egalitarian_1), float(egalitarian_2), float(egalitarian_3), float(egalitarian_4)],
             # "disp": [float(disparity_1), float(disparity_2), float(disparity_3), float(disparity_4)],
             # "nsw": [float(nash_welfare_1), float(nash_welfare_2), float(nash_welfare_3), float(nash_welfare_4)]
-            "mueemuensw" : [float(egalitarian_2), float(egalitarian_4)]
+            "mueemuensw" : [float(egalitarian_2), float(egalitarian_4)],
+            "ratio": ratio_curr
         }
     }
     # return convert_to_builtin(data), egalitarian_4 / egalitarian_2
-    results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
+    if ratio_curr < ratio_min:
+        ratio_min = ratio_curr
+        with open(filepath, 'w') as results_file:
+            results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
+    return ratio_min
