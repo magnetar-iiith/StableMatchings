@@ -96,15 +96,15 @@ def run(n):
 if __name__ == "__main__":
     # real_world_dataset()
     start_time = time.time()
-    # num_agents = 4
-    # num_workers = os.cpu_count()
-    # with Pool(num_workers) as pool:
-    #     pool.map(
-    #         worker,
-    #         [(i, num_workers, num_agents) for i in range(num_workers)]
-    #     )
-    with ProcessPoolExecutor() as executor:
-        results = list(executor.map(run, range(4, 5)))
+    num_agents = 4
+    num_workers = os.cpu_count()
+    with Pool(num_workers) as pool:
+        pool.map(
+            worker,
+            [(i, num_workers, num_agents) for i in range(num_workers)]
+        )
+    # with ProcessPoolExecutor() as executor:
+    #     results = list(executor.map(run, range(4, 5)))
     end_time = time.time()
     hrs = (end_time - start_time)/3600
     mins = ((end_time - start_time)%3600)/60
