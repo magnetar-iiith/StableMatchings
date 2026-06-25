@@ -191,12 +191,31 @@ def generate_matchings(num_aqents):
      with size num_agents men and women"""
     yield from permutations(range(num_aqents))
 
-def generate_instances(num_aqents):
-    """Generates all possible instances
-     with size num_agents men and women"""
-    prefs = list(permutations(range(num_aqents)))
-    for profile in product(prefs, repeat=2*num_aqents):
-        men = [list(profile[i]) for i in range(num_aqents)]
-        women = [list(profile[i]) for \
-                 i in range(num_aqents, 2*num_aqents)]
+def generate_instances(num_agents):
+    """
+    Generate all unique preference profiles with the first man's
+    preference list fixed to [0, 1, ..., num_agents-1].
+    """
+    prefs = list(permutations(range(num_agents)))
+    fixed_pref = tuple(range(num_agents))
+
+    # Generate preferences for the remaining agents:
+    # men[1:], women[:]
+    for profile in product(prefs, repeat=2 * num_agents - 1):
+        men = [list(fixed_pref)] + [
+            list(profile[i]) for i in range(num_agents - 1)
+        ]
+        women = [
+            list(profile[i]) for i in range(num_agents - 1, 2 * num_agents - 1)
+        ]
         yield [men, women]
+        
+# def generate_instances(num_aqents):
+#     """Generates all possible instances
+#      with size num_agents men and women"""
+#     prefs = list(permutations(range(num_aqents)))
+#     for profile in product(prefs, repeat=2*num_aqents):
+#         men = [list(profile[i]) for i in range(num_aqents)]
+#         women = [list(profile[i]) for \
+#                  i in range(num_aqents, 2*num_aqents)]
+#         yield [men, women]
