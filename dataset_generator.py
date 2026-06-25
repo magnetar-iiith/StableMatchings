@@ -29,32 +29,33 @@ def print_preflist(preflist):
     # list of women
 
 def create_ranklist(num_agents):
-    """Generates a preference list for one agent"""
-    perm = np.array(list(range(num_agents)))
-    # creates a list of agents
-    #  from 0 to num_agents-1
-    ranklist = np.zeros((num_agents, num_agents), dtype=int)
-    # ranklist[i] is preferences of agent i
+    ranklist = [[0] * num_agents for _ in range(num_agents)]
+
     for i in range(num_agents):
-        # iterating over each agent
-        ranklist[i] = np.random.permutation(perm)
-        # creates a random permutation of agents
-        # and assigns it to the preferences of agent i (1-indexed)
+        perm = list(range(num_agents))
+        random.shuffle(perm)
+        ranklist[i] = perm.copy()
+
     return ranklist
-# returns a ranklist of agents
+
+# def create_ranklist(num_agents):
+#     """Generates a preference list for one agent"""
+#     perm = np.array(list(range(num_agents)))
+#     # creates a list of agents
+#     #  from 0 to num_agents-1
+#     ranklist = np.zeros((num_agents, num_agents), dtype=int)
+#     # ranklist[i] is preferences of agent i
+#     for i in range(num_agents):
+#         # iterating over each agent
+#         ranklist[i] = np.random.permutation(perm)
+#         # creates a random permutation of agents
+#         # and assigns it to the preferences of agent i (1-indexed)
+#     return ranklist
 
 def create_preflist(num_agents):
     """Generates the complete instance"""
-    preflist = np.zeros((2, num_agents, num_agents), dtype=int)
-    # preflist[0] is preference list of men
-    # preflist[1] is preference list of women
-    preflist[0] = create_ranklist(num_agents)
-    # invoking create_ranklist
-    # to create mens preferences
-    preflist[1] = create_ranklist(num_agents)
-    # invoking create_ranklist
-    # to create womens preferences
-    return preflist.tolist()
+    preflist = [create_ranklist(num_agents), create_ranklist(num_agents)]
+    return preflist
 # returns a preference list of agents
 
 def create_weight_matrix(num_agents, lower, upper):

@@ -28,9 +28,9 @@ def routine(preflist, results_file):
     """Finds min-regret, egalitarian, sex-equal,
      and snsw stable matchings"""   
     male_optimal_matching = gale_shapley(preflist)
-    copy_preflist = copy.deepcopy(preflist)
-    men_shortlists, women_shortlists = create_shortlists(copy_preflist, male_optimal_matching)
-
+    # copy_preflist = copy.deepcopy(preflist)
+    # men_shortlists, women_shortlists = create_shortlists(copy_preflist, male_optimal_matching)
+    men_shortlists, women_shortlists = create_shortlists(preflist, male_optimal_matching)
     copy_men_shortlists = copy.deepcopy(men_shortlists)
     # create an copy by value of mens shortlists
     copy_women_shortlists = copy.deepcopy(women_shortlists)
@@ -45,40 +45,37 @@ def routine(preflist, results_file):
 
         eliminate_rotation(new_rotation, copy_men_shortlists, copy_women_shortlists)
 
-    copy_men_shortlists = copy.deepcopy(men_shortlists)
-    # create an copy by value of mens shortlists
-
-    copy_women_shortlists = copy.deepcopy(women_shortlists)
-
-    graph = create_rotation_digraph(rotations, copy_men_shortlists, women_shortlists)
+    graph = create_rotation_digraph(rotations, men_shortlists, women_shortlists)
 
     pred = predecessors(graph)
     topo_order = topological_sort(graph, pred)
     closed_subsets = closed_subset_finder(topo_order, pred)
-    min_regret  = float('inf')
+    # min_regret  = float('inf')
     min_egalitarian  = float('inf')
-    min_disparity  = float('inf')
+    # min_disparity  = float('inf')
     max_nash_welfare  = float('-inf')
-    min_regret_matching, min_egalitarian_matching, \
-    min_disparity_matching, max_nash_welfare_matching\
-     = None, None, None, None
+    min_egalitarian_matching, max_nash_welfare_matching = None, None
+    # min_regret_matching, min_egalitarian_matching, \
+    # min_disparity_matching, max_nash_welfare_matching\
+    #  = None, None, None, None
     for subset in closed_subsets:
         copy_men_shortlists = copy.deepcopy(men_shortlists)
         copy_women_shortlists = copy.deepcopy(women_shortlists)
         matching_1 = stable_matching(subset, rotations, topo_order, copy_men_shortlists, copy_women_shortlists)
-        regret_val = regret(matching_1, preflist)
+        
+        # regret_val = regret(matching_1, preflist)
         egalitarian_val = egalitarian(matching_1, preflist)
-        disparity_val = disparity(matching_1, preflist)
+        # disparity_val = disparity(matching_1, preflist)
         nash_welfare_val = nash_welfare(matching_1, preflist)
-        if regret_val < min_regret:
-            min_regret = regret_val
-            min_regret_matching = matching_1
+        # if regret_val < min_regret:
+        #     min_regret = regret_val
+        #     min_regret_matching = matching_1
         if egalitarian_val < min_egalitarian:
             min_egalitarian = egalitarian_val
             min_egalitarian_matching = matching_1
-        if disparity_val < min_disparity:
-            min_disparity = disparity_val
-            min_disparity_matching = matching_1
+        # if disparity_val < min_disparity:
+        #     min_disparity = disparity_val
+        #     min_disparity_matching = matching_1
         if nash_welfare_val > max_nash_welfare:
             max_nash_welfare = nash_welfare_val
             max_nash_welfare_matching = matching_1
@@ -103,9 +100,9 @@ def routine(preflist, results_file):
     # nash_welfare_4 = nash_welfare(max_nash_welfare_matching, preflist)
     data = {
         "preflist": convert_to_builtin(preflist),
-        "min_regret": min_regret_matching,
+        # "min_regret": min_regret_matching,
         "egalitarian": min_egalitarian_matching,
-        "sex_equal": min_disparity_matching,
+        # "sex_equal": min_disparity_matching,
         "nsw": max_nash_welfare_matching,
         "scores": {
             # "reg": [float(regret_1), float(regret_2), float(regret_3), float(regret_4)],
@@ -115,5 +112,5 @@ def routine(preflist, results_file):
             "mueemuensw" : [float(egalitarian_2), float(egalitarian_4)]
         }
     }
-    return convert_to_builtin(data), egalitarian_4 / egalitarian_2
-    # results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
+    # return convert_to_builtin(data), egalitarian_4 / egalitarian_2
+    results_file.write(json.dumps(convert_to_builtin(data)) + "\n")

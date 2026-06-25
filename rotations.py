@@ -1,59 +1,70 @@
 def identify_rotation(start_man, men_shortlists):
     # identify the current rotation exposed in the shortlists
-    rotation_idx, rotation = [], []
-    # rotation_idx stores the man being processed
+    position = {}
+    # position stores the man being processed
+    rotation = []
     # rotation stores the current rotation
     visited = set()
     # visited is a set of nodes
+    first_choice_to_man = {
+        man: None for man in ()
+    }
+    first_choice_to_man = {
+        prefs[0]: man
+        for man, prefs in enumerate(men_shortlists)
+        if prefs
+    }
+
     current_man = start_man
     # initial node is start_man
 
     while current_man not in visited:
         # while the current node is not visited
         visited.add(current_man)
+        prefs = men_shortlists[current_man]
+
         # add the current node in the visited set
-        if len(men_shortlists[current_man]) < 2:
+        if len(prefs) < 2:
             # if current node has less than 2 preferences
             rotation = None
             break
-        current_woman = men_shortlists[current_man][0]
-        # current_woman w_i is current_node/man m_i's partner
-        rotation_idx.append(current_man)
+        position[current_man] = len(rotation)
         # add the current node in the rotation index
-        rotation.append((current_man, current_woman))
+        rotation.append((current_man, prefs[0]))
         # add the current pair (m_i, w_i) in the rotation
         # var rotation is a rotation - a list of tuples
-        next_man = None
-        # next node is initialized as None
-        for iter_man, prefs in enumerate(men_shortlists):
-            # iterating over men in mens shortlists
-            # prefs is iter_man's preferences in mens shortlists
-            if prefs:
-                # if his preference list is not empty
-                if len(men_shortlists[current_man]) > 1:
-                    # if current_man has a second preference
-                    # in his preference list
-                    if prefs[0] == men_shortlists[current_man][1]:
-                        # if first preference of iter_man is
-                        # second preference of current_man m_i
-                        next_man = iter_man
-                        # next node to visit is iter_man
-                        break
-                    # move on
+        # next_man = None
+        # # next node is initialized as None
+        # for iter_man, prefs in enumerate(men_shortlists):
+        #     # iterating over men in mens shortlists
+        #     # prefs is iter_man's preferences in mens shortlists
+        #     if prefs:
+        #         # if his preference list is not empty
+        #         if len(men_shortlists[current_man]) > 1:
+        #             # if current_man has a second preference
+        #             # in his preference list
+        #             if prefs[0] == men_shortlists[current_man][1]:
+        #                 # if first preference of iter_man is
+        #                 # second preference of current_man m_i
+        #                 next_man = iter_man
+        #                 # next node to visit is iter_man
+        #                 break
+        #             # move on
+        next_man = first_choice_to_man.get(prefs[1])
+
         
         if next_man ==  None:
             # if no next man found, means no rotation exposed
             # in the shortlists
-            break
+            return None
         # stop
-        elif next_man in visited:
+        if next_man in visited:
             # else if next_man is already visited
-            rotation = rotation[rotation_idx.index(next_man):]
+            rotation = rotation[position[next_man]:]
             # rotation formed is (m_t, w_t) to (m_s-1, w_s-1)
             break
         # stop
-        else:
-            current_man = next_man
+        current_man = next_man
         # else continue appending the rotation
     # if the rotation is empty, return None
     if not rotation:
