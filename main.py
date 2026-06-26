@@ -106,9 +106,9 @@ if __name__ == "__main__":
     # with ProcessPoolExecutor() as executor:
     #     results = list(executor.map(run, range(4, 5)))
     end_time = time.time()
-    hrs = (end_time - start_time)/3600
-    mins = ((end_time - start_time)%3600)/60
-    secs = (end_time - start_time) % 3600
+    hrs = (end_time - start_time)//3600
+    mins = ((end_time - start_time)%3600)//60
+    secs = (end_time - start_time) % 60
     print(f"Time taken = {hrs} hours {mins} minutes {secs} seconds")
 
 
