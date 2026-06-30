@@ -13,7 +13,7 @@ def print_ranklist(ranklist):
     # number of agents on each side
     for i in range(num_agents):
         # iterating over each agent
-        print(i + 1, ranklist[i])
+        print(i, ranklist[i])
         # prints the ranklist of agent i (1-indexed)
 
 def print_preflist(preflist):
@@ -210,6 +210,49 @@ def generate_instances(num_agents):
         ]
         yield [men, women]
         
+def generate_instances_n_6():
+    """
+    Yields (men_prefs, women_prefs) for all 24^4 instances.
+    """
+    # Fixed men's preference lists
+    men_prefs = [
+        [0, 1, 2, 3, 4, 5],
+        [0, 1, 2, 3, 4, 5],
+        [0, 2, 3, 4, 5, 1],
+        [0, 3, 4, 5, 1, 2],
+        [0, 4, 5, 1, 2, 3],
+        [0, 5, 1, 2, 3, 4]
+    ]
+    # All permutations of [1,2,3,4]
+    all_perms = list(permutations(range(1, 6)))
+    # num_agents = 5
+    for perm0, perm1, perm2, perm3, perm4 in product(all_perms, repeat=5):
+        women_prefs = [
+            [0, 1, 2, 3, 4, 5],
+            [perm0[0], 0, perm0[1], perm0[2], perm0[3], perm0[4]],
+            [perm1[0], 0, perm1[1], perm1[2], perm1[3], perm1[4]],
+            [perm2[0], 0, perm2[1], perm2[2], perm2[3], perm2[4]],
+            [perm3[0], 0, perm3[1], perm3[2], perm3[3], perm3[4]],
+            [perm4[0], 0, perm4[1], perm4[2], perm4[3], perm4[4]],
+        ]
+        yield men_prefs, women_prefs
+    
+def create_pattern(num_agents):
+    preflist = [[list(range(num_agents)) for _ in range(num_agents)], \
+                [list(range(num_agents)) for _ in range(num_agents)]]
+    preflist[0][0] = list(range(num_agents))
+    preflist[1][0] = list(range(num_agents))
+    perm = list(range(1, num_agents))
+    for i in range(1, num_agents):
+        for j in range(1, num_agents):
+            preflist[0][i][j] = perm[(i + j - 2) % (num_agents - 1)]
+    for i in range(1, num_agents):
+        preflist[1][i][1] = 0
+        preflist[1][i][0] = perm[(i + j) % (num_agents - 1)]
+    for j in range(2, num_agents):
+        for i in range(1, num_agents):
+            preflist[1][i][j] = perm[(i + j - 1) % (num_agents - 1)]
+    return preflist
 # def generate_instances(num_aqents):
 #     """Generates all possible instances
 #      with size num_agents men and women"""

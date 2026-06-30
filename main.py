@@ -1,5 +1,5 @@
 import numpy as np
-from dataset_generator import create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, generate_instances
+from dataset_generator import print_preflist, create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, generate_instances,generate_instances_n_6, create_pattern
 from find_matchings import routine
 from data_processor_chatgpt import data_processor
 from concurrent.futures import ProcessPoolExecutor
@@ -61,14 +61,40 @@ def execute(num_agents, num_iters):
     #         preflist = normal_instance_generator(num_agents)
     #         routine(preflist, results_file)
 
+def regret_snsw_analysis(folderpath):
+    for filename in os.listdir(folderpath):
+        filepath = os.path.join(folderpath, filename)
+        with open(filepath, 'r') as f:
+            for line in f:
+                data = json.loads(line)
+                mu_r_Mr = data["scores"]["reg"][0]
+                mu_r_Msnsw = data["scores"]["reg"][3]
+                if mu_r_Mr < mu_r_Msnsw:
+                    print(line)
+                    break
+
+def egalitarian_n_4_snsw_analysis(folderpath):
+    ratio_min = float('inf')
+    min_filename = None
+    for filename in os.listdir(folderpath):
+        filepath = os.path.join(folderpath, filename)
+        with open(filepath, 'r') as f:
+            for line in f:
+                data = json.loads(line)
+                ratio_curr = data["scores"]["ratio"]
+                if ratio_curr < ratio_min:
+                    ratio_min = ratio_curr
+                    min_filename = filename
+    print(min_filename)
+
 def worker(args):
     worker_id, num_workers, num_agents = args
-    foldername = "latest_worst_ratio/"
+    foldername = "latest_worst_ratio_n=6/"
     os.makedirs(foldername, exist_ok=True)
     filename = f"matchings_{num_agents}_worst_ratio_{worker_id}.json"
     filepath = os.path.join(foldername, filename)
     ratio_min = float('inf')
-    for idx, instance in enumerate(generate_instances(num_agents)):
+    for idx, instance in enumerate(generate_instances_n_6()):
         if idx % num_workers == worker_id:
             ratio_min = routine(instance, filepath, ratio_min)
     
@@ -94,9 +120,21 @@ def run(n):
     execute(n, 1000000)
 
 if __name__ == "__main__":
+    # for n in range(4, 6):
+    #     print(n)
+    #     preflist = create_pattern(n)
+    #     print_preflist(preflist)
+    #     filename = f"pattern_n={n}.json"
+    #     folderpath = "./latest_worst_ratio/"
+    #     filepath = os.path.join(folderpath, filename)
+    #     ratio = routine(preflist, filepath, float('inf'))
+    #     print(ratio)
+    # folderpath = 'latest_worst_ratio_25June2026'
+    # egalitarian_n_4_snsw_analysis(folderpath)
+    # regret_snsw_analysis(folderpath)
     # real_world_dataset()
     start_time = time.time()
-    num_agents = 4
+    num_agents = 6
     num_workers = os.cpu_count()
     with Pool(num_workers) as pool:
         pool.map(
@@ -105,11 +143,11 @@ if __name__ == "__main__":
         )
     # with ProcessPoolExecutor() as executor:
     #     results = list(executor.map(run, range(4, 5)))
-    end_time = time.time()
-    hrs = (end_time - start_time)//3600
-    mins = ((end_time - start_time)%3600)//60
-    secs = (end_time - start_time) % 60
-    print(f"Time taken = {hrs} hours {mins} minutes {secs} seconds")
+    # end_time = time.time()
+    # hrs = (end_time - start_time)//3600
+    # mins = ((end_time - start_time)%3600)//60
+    # secs = (end_time - start_time) % 60
+    # print(f"Time taken = {hrs} hours {mins} minutes {secs} seconds")
 
 
 # preflist = [[[2, 1, 4, 0, 3],
