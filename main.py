@@ -1,11 +1,15 @@
 import numpy as np
-from dataset_generator import print_preflist, create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, generate_instances,generate_instances_n_6, create_pattern
-from find_matchings import routine
+from dataset_generator import print_preflist, generate_man0_preferences, generate_worst_ratio_prefs, create_preflist, create_preference_list, uniform_instance_generator, triangular_instance_generator, normal_instance_generator, generate_instances,generate_instances_n_6, create_pattern
+from graph_analysis import analyze_ratio
+from find_matchings import routine, convert_to_builtin
 from data_processor_chatgpt import data_processor
+from itertools import permutations
 from concurrent.futures import ProcessPoolExecutor
 from itertools import islice
-from multiprocessing import Pool
+from matplotlib import pyplot as plt
+import multiprocessing
 import time
+import copy
 import os
 from itertools import repeat
 import ctypes
@@ -119,35 +123,240 @@ def run(n):
     print(f"Number of Agents = {n}") 
     execute(n, 1000000)
 
+def process_modification(args):
+    preflist, modification = args
+
+    _preflist = copy.deepcopy(preflist)
+    _preflist[0][0] = modification
+
+    # Modify routine so that it returns
+    # (result_dict, ratio)
+    result, ratio = routine(_preflist)
+
+    return result, ratio
+
 if __name__ == "__main__":
-    # for n in range(4, 6):
+    n = 14
+    preflist = generate_worst_ratio_prefs(n, n // 2)
+
+    modifications = permutations(range(n))
+
+    folderpath = "./AAAI_2027_exps/"
+    os.makedirs(folderpath, exist_ok=True)
+
+    filename = f"man_0_all_modifications_n={n}.json"
+    filepath = os.path.join(folderpath, filename)
+
+    base_preflist = {
+        "preflist_common": convert_to_builtin(preflist)
+    }
+
+    min_ratio_so_far = float("inf")
+
+    with open(filepath, "w") as results_file:
+        results_file.write(json.dumps(base_preflist) + "\n")
+
+        with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+
+            args = ((preflist, modification) for modification in modifications)
+
+            for i, (result, ratio) in enumerate(executor.map(process_modification, args, chunksize=100)):
+                if i % 10000 == 0:
+                    print(i)
+
+                min_ratio_so_far = min(min_ratio_so_far, ratio)
+
+                results_file.write(json.dumps(result) + "\n")
+
+    print("Minimum ratio:", min_ratio_so_far)
+    # for n in range(6, 8):
     #     print(n)
-    #     preflist = create_pattern(n)
+        # preflist = create_pattern(n)
     #     print_preflist(preflist)
-    #     filename = f"pattern_n={n}.json"
-    #     folderpath = "./latest_worst_ratio/"
-    #     filepath = os.path.join(folderpath, filename)
+        # filename = f"pattern_n={n}.json"
+        # folderpath = "./latest_worst_ratio/"
+        # filepath = os.path.join(folderpath, filename)
     #     ratio = routine(preflist, filepath, float('inf'))
     #     print(ratio)
+    # for n in range(4, 11):
+    # men_preflist = []
+    # for t in range(n):
+    #     men_preflist.append(list(range(t, n)) + list(range(t)))
+    #     # men_preflist.append(list(range(n)))
+    # list_of_women_prefs = generate_instances(n)
+    # ratio_list = []
+    # ratio_min = float('inf')
+    # preflist_min = None
+    # folderpath = "./exps/"
+    # os.makedirs(folderpath, exist_ok=True)
+    # for i, women_preflist in enumerate(list_of_women_prefs):
+    #     if i % 10000 == 0:
+    #         print(i)
+    #     preflist = [men_preflist, women_preflist]
+    #     filename = f"coop_men_all_women_n={n}.json"
+    #     filepath = os.path.join(folderpath, filename)
+    #     ratio_curr = routine(preflist, filepath, ratio_min)
+    #     ratio_list.append(ratio_curr)
+    #     if ratio_curr < ratio_min:
+    #         ratio_min = ratio_curr
+    #         preflist_min = preflist
+    # print("Minimum Ratio = ", ratio_min)
+    # print("Minimum Ratio Preference List")
+    # print_preflist(preflist_min)
+    # analyze_ratio(ratio_list)
+    # for ratio, indices in dict.items():
+    #     print("=============================================================================================================")
+    #     print(ratio)
+    #     print("=============================================================================================================")
+        # for j, i in enumerate(indices):
+        #     if j > 1:
+        #         break
+            # print("mue(Me) = ", mueMe_list[i])
+            # print("mue(Msnsw)", mueMsnsw_list[i])
+            # print_ranklist(list_of_women_prefs[i])
+            # break
+    # preflist = [[[0, 1, 2, 3],
+    #              [0, 1, 2, 3],
+    #              [0, 1, 2, 3],
+    #              [0, 1, 2, 3]],
+    #             [[1, 2, 3, 0],
+    #              [2, 3, 0, 1],
+    #              [2, 1, 0, 3],
+    #              [3, 2, 1, 0]]]
+
+    # preflist = [[[0, 1, 3, 2, 4, 5, 6, 7],
+    #              [0, 1, 3, 2, 4, 5, 6, 7],
+    #              [2, 3, 1, 0, 7, 6, 5, 4],
+    #              [2, 3, 1, 0, 7, 6, 5, 4],
+    #              [4, 5, 6, 7, 3, 2, 1, 0],
+    #              [4, 5, 6, 7, 3, 2, 1, 0],
+    #              [6, 7, 5, 4, 1, 0, 3, 2],
+    #              [6, 7, 5, 4, 1, 0, 3, 2]],
+    #             [[]]]
+    # preflist = [[[[0, 1, 2, 3, 4, 5, 6, 7],
+    #              [0, 1, 2, 3, 4, 5, 6, 7],
+    #              [3, 2, 1, 0, 7, 6, 5, 4],
+    #              [3, 2, 1, 0, 7, 6, 5, 4],
+    #              [4, 5, 6, 7, 2, 3, 0, 1],
+    #              [4, 5, 6, 7, 2, 3, 0, 1],
+    #              [6, 7, 4, 5, 1, 0, 3, 2],
+    #              [6, 7, 4, 5, 1, 0, 3, 2],],
+    #             [[5, 4, 6, 7, 2, 3, 1, 0],
+    #              [4, 5, 7, 6, 3, 2, 0, 1],
+    #              [6, 7, 5, 4, 1, 0, 2, 3],
+    #              [7, 6, 4, 5, 0, 1, 3, 2],
+    #              [4, 5, 6, 7, 0, 2, 3, 1],
+    #              [5, 4, 7, 6, 2, 0, 1, 3],
+    #              [6, 7, 4, 5, 3, 1, 0, 2],
+    #              [7, 6, 5, 4, 3, 2, 1, 0]]]]
+    # 
+    #                  [10, 3, 2, 1, 0, 4, 5, 6, 7, 8, 9, 11, 12, 13]]
+    # for r in range(1, (n // 2) + 1):
+    # r = 3
+    # modifications = []
+    # modifications = generate_man0_preferences(n, 3, r)
+    # modifications.append(list(range(n)))
+    # modifications = [[5, 4, 0, 1, 2, 3], [4, 5, 0, 1, 2, 3]]
+    # modifications.append([n - 1] + list(range(n - 1)))
+    # for x in range(n):
+    #     modifications.append([x] + list(range(0, x)) + list(range(x + 1, n)))
+    # modifications = list(permutations(range(n)))
+    # modifications.append(range(n))
+    # identical_agents = list(range(0, (n // 2)))
+    # identical_agents.append(n - 1)
+    # cyclic_agents = list(range((n // 2), n - 1))
+
+
+    # list_of_prefs = change_first_agent_pref(preflist, identical_agents, cyclic_agents)
+    # preflist = [[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 7], 
+    #              [0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 7, 8], 
+    #              [0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 7, 8, 9], 
+    #              [0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 7, 8, 9, 10], 
+    #              [0, 1, 2, 3, 4, 5, 6, 12, 13, 7, 8, 9, 10, 11], 
+    #              [0, 1, 2, 3, 4, 5, 6, 13, 7, 8, 9, 10, 11, 12]], 
+    #             [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 
+    #              [8, 0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 7], 
+    #              [9, 0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 7, 8], 
+    #              [10, 0, 1, 2, 3, 4, 5, 6, 11, 12, 13, 7, 8, 9], 
+    #              [11, 0, 1, 2, 3, 4, 5, 6, 12, 13, 7, 8, 9, 10], 
+    #              [12, 0, 1, 2, 3, 4, 5, 6, 13, 7, 8, 9, 10, 11], 
+    #              [13, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 
+    #              [7, 0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]]]
+    # print_preflist(preflist)
+    # print(preflist)
+    # dict = {}
+    # for i in range(len(cyclic_agents)):
+    #     dict[i] = set()
+    # mueMe_list = []
+    # mueMsnsw_list = []
+    #     # print_preflist(_preflist)
+    #     # print(ratio)
+        # ratio_list.append(ratio)
+    #     mueMe_list.append(mueMe)
+    #     mueMsnsw_list.append(mueMsnsw)
+    # dict = analyze_ratio(ratio_list)
+    # for ratio, indices in dict.items():
+    #     print("========================================")
+    #     print(ratio)
+    #     print("========================================")
+    #     for j, i in enumerate(indices):
+    #         if j > 100:
+    #             break
+    #         # print("mue(Me) = ", mueMe_list[i])
+    #         # print("mue(Msnsw)", mueMsnsw_list[i])
+    #         print(modifications[i])
+    #         # break
+
+    #     # print(i)
+    #     # if i < 2000:
+    #     #     continue
+    #     # if i > 2000:
+    #     #     break
+    #     print(modifications[i - 1], modifications[i])
+        
+        # x_list = range(len(ratio_list))
+        # plt.plot(x_list, ratio_list)
+        # plt.show()
+        # print(ratio)
+    #     pref = preflist[0][0]
+    #     idx = pref.index(n - 2)
+    #     dict[idx].add(ratio)
+    # print(dict)
+        # print(ratio)
+        # print_preflist(preflist)
     # folderpath = 'latest_worst_ratio_25June2026'
     # egalitarian_n_4_snsw_analysis(folderpath)
     # regret_snsw_analysis(folderpath)
     # real_world_dataset()
-    start_time = time.time()
-    num_agents = 6
-    num_workers = os.cpu_count()
-    with Pool(num_workers) as pool:
-        pool.map(
-            worker,
-            [(i, num_workers, num_agents) for i in range(num_workers)]
-        )
+    # start_time = time.time()
+    # num_agents = 6
+    # num_workers = os.cpu_count()
+    # with Pool(num_workers) as pool:
+    #     pool.map(
+    #         worker,
+    #         [(i, num_workers, num_agents) for i in range(num_workers)]
+    #     )
     # with ProcessPoolExecutor() as executor:
     #     results = list(executor.map(run, range(4, 5)))
     # end_time = time.time()
     # hrs = (end_time - start_time)//3600
     # mins = ((end_time - start_time)%3600)//60
     # secs = (end_time - start_time) % 60
-    # print(f"Time taken = {hrs} hours {mins} minutes {secs} seconds")
+    # prina if rt(f"Time taken = {hrs} hours {mins} minutes {secs} seconds")
 
 
 # preflist = [[[2, 1, 4, 0, 3],

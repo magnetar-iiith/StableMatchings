@@ -29,7 +29,7 @@ def egalitarian_welfare(matching, preflist):
         rank_woman = num_agents - preflist[1][woman].index(man)
         d_man += rank_man
         d_woman += rank_woman
-    return (d_man + d_woman)/(2*num_agents)
+    return (d_man + d_woman)
 
 def disparity(matching, preflist):
     """calculate disparity"""

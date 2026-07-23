@@ -1,10 +1,10 @@
 import numpy as np
 import json
 import copy
-from gale_shapley_alg import gale_shapley
-from shortlists import create_shortlists
-from rotations import find_a_rotation, eliminate_rotation
-from graph_construction import closed_subset_finder, create_rotation_digraph, predecessors, topological_sort, stable_matching
+from gale_shapley_alg import gale_shapley, print_matching
+from shortlists import create_shortlists, print_shortlists
+from rotations import find_a_rotation, eliminate_rotation, print_rotations
+from graph_construction import assign_weights_1, assign_weights_2, print_graph, closed_subset_finder, create_rotation_digraph, predecessors, topological_sort, stable_matching
 from measures import regret, egalitarian, disparity, nash_welfare, egalitarian_welfare
 
 def convert_to_builtin(obj):
@@ -24,13 +24,15 @@ def convert_to_builtin(obj):
     else:
         return obj
     
-def routine(preflist, filepath, ratio_min):
+def routine(preflist):
     """Finds min-regret, egalitarian, sex-equal,
      and snsw stable matchings"""   
     male_optimal_matching = gale_shapley(preflist)
     # copy_preflist = copy.deepcopy(preflist)
     # men_shortlists, women_shortlists = create_shortlists(copy_preflist, male_optimal_matching)
     men_shortlists, women_shortlists = create_shortlists(preflist, male_optimal_matching)
+    # print_shortlists(men_shortlists)
+    # print_shortlists(women_shortlists)
     copy_men_shortlists = copy.deepcopy(men_shortlists)
     # create an copy by value of mens shortlists
     copy_women_shortlists = copy.deepcopy(women_shortlists)
@@ -44,9 +46,12 @@ def routine(preflist, filepath, ratio_min):
         rotations.append(new_rotation)
 
         eliminate_rotation(new_rotation, copy_men_shortlists, copy_women_shortlists)
-
+    # weights_1 = assign_weights_1(rotations, preflist)
+    # weights_2 = assign_weights_2(rotations, preflist)
+    # print_rotations(rotations, weights_1)
+    # print_rotations(rotations, weights_2)
     graph = create_rotation_digraph(rotations, men_shortlists, women_shortlists)
-
+    # print_graph(graph)
     pred = predecessors(graph)
     topo_order = topological_sort(graph, pred)
     closed_subsets = closed_subset_finder(topo_order, pred)
@@ -99,24 +104,26 @@ def routine(preflist, filepath, ratio_min):
     # disparity_4 = disparity(max_nash_welfare_matching, preflist)
     # nash_welfare_4 = nash_welfare(max_nash_welfare_matching, preflist)
     ratio_curr = egalitarian_4 / egalitarian_2
+    # print_matching(min_egalitarian_matching)
+    # print_matching(max_nash_welfare_matching)
     data = {
-        "preflist": convert_to_builtin(preflist),
+        "pref_man_0": convert_to_builtin(preflist[0][0]),
         # "min_regret": min_regret_matching,
-        "egalitarian": min_egalitarian_matching,
+        "Me": min_egalitarian_matching,
         # "sex_equal": min_disparity_matching,
-        "nsw": max_nash_welfare_matching,
+        "Msnsw": max_nash_welfare_matching,
         "scores": {
             # "reg": [float(regret_1), float(regret_2), float(regret_3), float(regret_4)],
             # "eg": [float(egalitarian_1), float(egalitarian_2), float(egalitarian_3), float(egalitarian_4)],
             # "disp": [float(disparity_1), float(disparity_2), float(disparity_3), float(disparity_4)],
             # "nsw": [float(nash_welfare_1), float(nash_welfare_2), float(nash_welfare_3), float(nash_welfare_4)]
-            "mueemuensw" : [float(egalitarian_2), float(egalitarian_4)],
+            "mue(Me)": float(egalitarian_2),
+            "mue(Msnsw)": float(egalitarian_4),
             "ratio": ratio_curr
         }
     }
     # return convert_to_builtin(data), egalitarian_4 / egalitarian_2
-    if ratio_curr < ratio_min:
-        ratio_min = ratio_curr
-        with open(filepath, 'w') as results_file:
-            results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
-    return ratio_min
+    # if ratio_curr < ratio_min:
+    #     ratio_min = ratio_curr
+    # results_file.write(json.dumps(convert_to_builtin(data)) + "\n")
+    return data, ratio_curr

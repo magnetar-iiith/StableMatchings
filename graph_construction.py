@@ -106,7 +106,24 @@ def closed_subset_finder(topo_order, pred):
     dfs(0, s, closed_subsets, topo_order, pred)
     return closed_subsets
 
-def assign_weights(rotations, preflist):
+def assign_weights_1(rotations, preflist):
+    """Assigns weights to rotations"""
+    weights = defaultdict(float)
+    n = len(preflist[0])
+    for i, rotation in enumerate(rotations):
+        weights[i] = 0
+    for i, rotation in enumerate(rotations):
+        r = len(rotation)
+        for j, (m, w) in enumerate(rotation):
+            j_plus = (j + 1) % r
+            j_minus = (j + r - 1) % r
+            weights[i] += ((n - preflist[0][m].index(w)) + (n - preflist[1][w].index(m)))
+            weights[i] -= \
+            ((n - preflist[0][m].index(rotation[j_plus][1])) +\
+              (n - preflist[1][w].index(rotation[j_minus][0])))
+    return weights
+
+def assign_weights_2(rotations, preflist):
     """Assigns weights to rotations"""
     weights = defaultdict(float)
     n = len(preflist[0])

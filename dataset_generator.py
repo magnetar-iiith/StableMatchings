@@ -3,6 +3,7 @@
 from itertools import permutations, product
 import random
 import numpy as np
+import copy
 
 random.seed(42)
 
@@ -253,12 +254,108 @@ def create_pattern(num_agents):
         for i in range(1, num_agents):
             preflist[1][i][j] = perm[(i + j - 1) % (num_agents - 1)]
     return preflist
-# def generate_instances(num_aqents):
-#     """Generates all possible instances
-#      with size num_agents men and women"""
-#     prefs = list(permutations(range(num_aqents)))
-#     for profile in product(prefs, repeat=2*num_aqents):
-#         men = [list(profile[i]) for i in range(num_aqents)]
-#         women = [list(profile[i]) for \
-#                  i in range(num_aqents, 2*num_aqents)]
-#         yield [men, women]
+
+def generate_worst_ratio_prefs(n, k):
+
+    men = []
+    women = []
+
+    # ---------------- Men's preferences ----------------
+    for m in range(n):
+        if m < k:
+            men.append(list(range(n)))
+        else:
+            t = m - k
+            men.append(
+                list(range(k))
+                + list(range(k + t, n))
+                + list(range(k, k + t))
+            )
+
+    # ---------------- Women's preferences ----------------
+    # First k women are identical
+    for _ in range(k):
+        women.append(list(range(n)))
+
+    # Remaining women are cyclic
+    for w in range(k, n):
+
+        # Find the man who ranks w last
+        first_man = None
+        for m in range(n):
+            if men[m][-1] == w:
+                first_man = m
+
+        pref = [first_man]
+
+        # Identical men
+        for m in range(k):
+            pref.append(m)
+
+        # Cyclic men in cyclic order after first_man
+        cyclic = list(range(k, n))
+        if first_man >= k:
+            idx = cyclic.index(first_man)
+            order = cyclic[idx + 1:] + cyclic[:idx]
+        else:
+            order = cyclic
+
+        for m in order:
+            pref.append(m)
+
+        women.append(pref)
+
+    return [men, women]
+
+def generate_man0_preferences(n, k, r):
+    """
+    Generate all preference lists for man 0.
+
+    Parameters
+    ----------
+    n : int
+        Total number of women (0, ..., n-1).
+    k : int
+        Women 0,...,k-1 are identical.
+        Women k,...,n-1 are cyclic.
+    r : int
+        Number of identical women to be taken before
+        Woman 0 in the preference list
+
+    Returns
+    -------
+    list_of_preference_lists : list[list[int]]
+    """
+    identical = list(range(k))
+    cyclic = list(range(k, n))
+
+    list_of_preference_lists = []
+
+    # Number of cyclic agents placed before the identical block
+    # for r in range(0, len(cyclic) + 1):
+    for chosen in permutations(cyclic, r):
+        chosen = list(chosen)
+
+        # Remaining cyclic agents in increasing order
+        remaining_identical = [w for w in identical if w not in chosen]
+        remaining_cyclic = [w for w in cyclic if w not in chosen]
+
+        preference = (
+            chosen +
+            remaining_identical +
+            remaining_cyclic
+        )
+
+        list_of_preference_lists.append(preference)
+
+    return list_of_preference_lists
+
+def generate_instances(num_aqents):
+    """Generates all possible instances
+     with size num_agents men and women"""
+    prefs = list(permutations(range(num_aqents)))
+    for profile in product(prefs, repeat=num_aqents):
+        women = [list(profile[i]) for i in range(num_aqents)]
+        # women = [list(profile[i]) for \
+        #          i in range(num_aqents, 2*num_aqents)]
+        yield women
