@@ -3,7 +3,7 @@ from dataset_generator import print_preflist, generate_man0_preferences, generat
 from graph_analysis import analyze_ratio
 from find_matchings import routine, convert_to_builtin
 from data_processor_chatgpt import data_processor
-from itertools import permutations
+from itertools import permutations, product
 from concurrent.futures import ProcessPoolExecutor
 from itertools import islice
 from matplotlib import pyplot as plt
@@ -14,6 +14,7 @@ import os
 from itertools import repeat
 import ctypes
 import json
+import math
 np.random.seed(69)
 
 # alg_1 is for min regret optimal algorithm
@@ -123,52 +124,91 @@ def run(n):
     print(f"Number of Agents = {n}") 
     execute(n, 1000000)
 
-def process_modification(args):
+def process_modification_1(args):
     preflist, modification = args
 
     _preflist = copy.deepcopy(preflist)
-    _preflist[0][0] = modification
+    _preflist[0][0] = list(modification[0])
+    _preflist[0][1] = list(modification[1])
 
     # Modify routine so that it returns
     # (result_dict, ratio)
     result, ratio = routine(_preflist)
+    result["pref_man_0"] = convert_to_builtin(modification[0])
+    result["pref_man_1"] = convert_to_builtin(modification[1])
+    return result, ratio
 
+def process_modification_2(args):
+    preflist, modification = args
+
+    _preflist = copy.deepcopy(preflist)
+    _preflist[0][0] = list(modification[0])
+    _preflist[1][0] = list(modification[1])
+
+    # Modify routine so that it returns
+    # (result_dict, ratio)
+    result, ratio = routine(_preflist)
+    
+    result["pref_man_0"] = convert_to_builtin(modification[0])
+    result["pref_woman_0"] = convert_to_builtin(modification[1])
     return result, ratio
 
 if __name__ == "__main__":
-    n = 14
-    preflist = generate_worst_ratio_prefs(n, n // 2)
+    for n in range(4, 8):
+        k = max(0, n - 1 - 2*math.floor(math.sqrt(n)))
+        preflist = generate_worst_ratio_prefs(n, k)
 
-    modifications = permutations(range(n))
+        modifications = product(permutations(range(n)), repeat=2)
 
-    folderpath = "./AAAI_2027_exps/"
-    os.makedirs(folderpath, exist_ok=True)
+        folderpath = "./AAAI_2027_exps/"
+        os.makedirs(folderpath, exist_ok=True)
 
-    filename = f"man_0_all_modifications_n={n}.json"
-    filepath = os.path.join(folderpath, filename)
+        filename_1 = f"man_0_man_1_all_modifications_n={n}.json"
+        filename_2 = f"man_0_woman_0_all_modifications_n={n}.json"
+        filepath_1 = os.path.join(folderpath, filename_1)
+        filepath_2 = os.path.join(folderpath, filename_2)
 
-    base_preflist = {
-        "preflist_common": convert_to_builtin(preflist)
-    }
 
-    min_ratio_so_far = float("inf")
+        base_preflist = {
+            "preflist_common": convert_to_builtin(preflist)
+        }
 
-    with open(filepath, "w") as results_file:
-        results_file.write(json.dumps(base_preflist) + "\n")
+        min_ratio_so_far = float("inf")
 
-        with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+        with open(filepath_1, "w") as results_file:
+            results_file.write(json.dumps(base_preflist) + "\n")
 
-            args = ((preflist, modification) for modification in modifications)
+            with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
 
-            for i, (result, ratio) in enumerate(executor.map(process_modification, args, chunksize=100)):
-                if i % 10000 == 0:
-                    print(i)
+                args = ((preflist, modification) for modification in modifications)
 
-                min_ratio_so_far = min(min_ratio_so_far, ratio)
+                for i, (result, ratio) in enumerate(executor.map(process_modification_1, args, chunksize=100)):
+                    if i % 10000 == 0:
+                        print(i)
 
-                results_file.write(json.dumps(result) + "\n")
+                    min_ratio_so_far = min(min_ratio_so_far, ratio)
 
-    print("Minimum ratio:", min_ratio_so_far)
+                    results_file.write(json.dumps(result) + "\n")
+
+        print("Minimum ratio:", min_ratio_so_far)
+
+        with open(filepath_2, "w") as results_file:
+                results_file.write(json.dumps(base_preflist) + "\n")
+        
+                with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+        
+                    modifications = product(permutations(range(n)), repeat=2)
+                    args = ((preflist, modification) for modification in modifications)
+        
+                    for i, (result, ratio) in enumerate(executor.map(process_modification_2, args, chunksize=100)):
+                        if i % 10000 == 0:
+                            print(i)
+        
+                        min_ratio_so_far = min(min_ratio_so_far, ratio)
+        
+                        results_file.write(json.dumps(result) + "\n")
+        
+        print("Minimum ratio:", min_ratio_so_far)
     # for n in range(6, 8):
     #     print(n)
         # preflist = create_pattern(n)

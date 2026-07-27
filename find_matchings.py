@@ -107,7 +107,7 @@ def routine(preflist):
     # print_matching(min_egalitarian_matching)
     # print_matching(max_nash_welfare_matching)
     data = {
-        "pref_man_0": convert_to_builtin(preflist[0][0]),
+        # "pref_0": convert_to_builtin(preflist[0][0]),
         # "min_regret": min_regret_matching,
         "Me": min_egalitarian_matching,
         # "sex_equal": min_disparity_matching,
