@@ -59,6 +59,7 @@ def routine(preflist):
     min_egalitarian  = float('inf')
     # min_disparity  = float('inf')
     max_nash_welfare  = float('-inf')
+    max_nash_egalitarian_welfare = float('-inf')
     min_egalitarian_matching, max_nash_welfare_matching = None, None
     # min_regret_matching, min_egalitarian_matching, \
     # min_disparity_matching, max_nash_welfare_matching\
@@ -81,9 +82,16 @@ def routine(preflist):
         # if disparity_val < min_disparity:
         #     min_disparity = disparity_val
         #     min_disparity_matching = matching_1
-        if nash_welfare_val > max_nash_welfare:
+        current_egalitarian_welfare = egalitarian_welfare(matching_1, preflist)
+        if nash_welfare_val > max_nash_welfare and not np.isclose(nash_welfare_val, max_nash_welfare):
             max_nash_welfare = nash_welfare_val
             max_nash_welfare_matching = matching_1
+            max_nash_egalitarian_welfare = current_egalitarian_welfare
+        elif np.isclose(nash_welfare_val, max_nash_welfare):
+            if current_egalitarian_welfare > max_nash_egalitarian_welfare:
+                max_nash_welfare = max(max_nash_welfare, nash_welfare_val)
+                max_nash_welfare_matching = matching_1
+                max_nash_egalitarian_welfare = current_egalitarian_welfare
     # regret_1 = regret(min_regret_matching, preflist)
     # egalitarian_1 = egalitarian(min_regret_matching, preflist)
     # disparity_1 = disparity(min_regret_matching, preflist)

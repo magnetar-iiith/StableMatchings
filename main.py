@@ -128,45 +128,28 @@ def init_worker(shared_preflist):
     global global_preflist
     global_preflist = shared_preflist
 
-def process_modification_1(modification):
+def process_modification(modification):
     _preflist = copy.deepcopy(global_preflist)
-    _preflist[0][0] = list(modification[0])
-    _preflist[0][1] = list(modification[1])
+    _preflist[0][0] = list(modification)
 
     # Modify routine so that it returns
     # (result_dict, ratio)
     result, ratio = routine(_preflist)
-    result["pref_man_0"] = convert_to_builtin(modification[0])
-    result["pref_man_1"] = convert_to_builtin(modification[1])
-    return result, ratio
-
-def process_modification_2(modification):
-    _preflist = copy.deepcopy(global_preflist)
-    _preflist[0][0] = list(modification[0])
-    _preflist[1][0] = list(modification[1])
-
-    # Modify routine so that it returns
-    # (result_dict, ratio)
-    result, ratio = routine(_preflist)
-    
-    result["pref_man_0"] = convert_to_builtin(modification[0])
-    result["pref_woman_0"] = convert_to_builtin(modification[1])
+    result["pref_man_0"] = convert_to_builtin(modification)
     return result, ratio
 
 if __name__ == "__main__":
-    for n in range(7, 8):
+    for n in range(10, 11):
         k = max(0, n - 1 - 2*math.floor(math.sqrt(n)))
         preflist = generate_worst_ratio_prefs(n, k)
 
-        modifications = product(permutations(range(n)), repeat=2)
+        modifications = permutations(range(n))
 
-        folderpath = "./AAAI_2027_exps/"
+        folderpath = "./AAAI_2027_final_exps/"
         os.makedirs(folderpath, exist_ok=True)
 
-        filename_1 = f"man_0_man_1_all_modifications_n={n}.json"
-        filename_2 = f"man_0_woman_0_all_modifications_n={n}.json"
-        filepath_1 = os.path.join(folderpath, filename_1)
-        filepath_2 = os.path.join(folderpath, filename_2)
+        filename = f"man_0_all_modifications_n={n}.json"
+        filepath = os.path.join(folderpath, filename)
 
 
         base_preflist = {
@@ -175,7 +158,7 @@ if __name__ == "__main__":
 
         min_ratio_so_far = float("inf")
         print("Base Preflist Computed")
-        with open(filepath_1, "w") as results_file:
+        with open(filepath, "w") as results_file:
             results_file.write(json.dumps(base_preflist) + "\n")
 
             with multiprocessing.Pool(
@@ -184,7 +167,7 @@ if __name__ == "__main__":
                 initargs=(preflist,)
             ) as pool:
 
-                for i, (result, ratio) in enumerate(pool.imap_unordered(process_modification_1, modifications, chunksize=100)):
+                for i, (result, ratio) in enumerate(pool.imap_unordered(process_modification, modifications, chunksize=100)):
                     if i % 10000 == 0:
                         print(i)
 
@@ -192,27 +175,6 @@ if __name__ == "__main__":
 
                     results_file.write(json.dumps(result) + "\n")
 
-        print("Minimum ratio:", min_ratio_so_far)
-
-        with open(filepath_2, "w") as results_file:
-                results_file.write(json.dumps(base_preflist) + "\n")
-        
-                with multiprocessing.Pool(
-                    processes=multiprocessing.cpu_count(),
-                    initializer=init_worker,
-                    initargs=(preflist,)
-                ) as pool:
-        
-                    modifications = product(permutations(range(n)), repeat=2)
-        
-                    for i, (result, ratio) in enumerate(pool.imap_unordered(process_modification_2, modifications, chunksize=100)):
-                        if i % 10000 == 0:
-                            print(i)
-        
-                        min_ratio_so_far = min(min_ratio_so_far, ratio)
-        
-                        results_file.write(json.dumps(result) + "\n")
-        
         print("Minimum ratio:", min_ratio_so_far)
     # for n in range(6, 8):
     #     print(n)
