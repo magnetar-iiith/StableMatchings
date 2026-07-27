@@ -124,10 +124,12 @@ def run(n):
     print(f"Number of Agents = {n}") 
     execute(n, 1000000)
 
-def process_modification_1(args):
-    preflist, modification = args
+def init_worker(shared_preflist):
+    global global_preflist
+    global_preflist = shared_preflist
 
-    _preflist = copy.deepcopy(preflist)
+def process_modification_1(modification):
+    _preflist = copy.deepcopy(global_preflist)
     _preflist[0][0] = list(modification[0])
     _preflist[0][1] = list(modification[1])
 
@@ -138,10 +140,8 @@ def process_modification_1(args):
     result["pref_man_1"] = convert_to_builtin(modification[1])
     return result, ratio
 
-def process_modification_2(args):
-    preflist, modification = args
-
-    _preflist = copy.deepcopy(preflist)
+def process_modification_2(modification):
+    _preflist = copy.deepcopy(global_preflist)
     _preflist[0][0] = list(modification[0])
     _preflist[1][0] = list(modification[1])
 
@@ -154,7 +154,7 @@ def process_modification_2(args):
     return result, ratio
 
 if __name__ == "__main__":
-    for n in range(4, 8):
+    for n in range(7, 8):
         k = max(0, n - 1 - 2*math.floor(math.sqrt(n)))
         preflist = generate_worst_ratio_prefs(n, k)
 
@@ -174,15 +174,17 @@ if __name__ == "__main__":
         }
 
         min_ratio_so_far = float("inf")
-
+        print("Base Preflist Computed")
         with open(filepath_1, "w") as results_file:
             results_file.write(json.dumps(base_preflist) + "\n")
 
-            with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+            with multiprocessing.Pool(
+                processes=multiprocessing.cpu_count(),
+                initializer=init_worker,
+                initargs=(preflist,)
+            ) as pool:
 
-                args = ((preflist, modification) for modification in modifications)
-
-                for i, (result, ratio) in enumerate(executor.map(process_modification_1, args, chunksize=100)):
+                for i, (result, ratio) in enumerate(pool.imap_unordered(process_modification_1, modifications, chunksize=100)):
                     if i % 10000 == 0:
                         print(i)
 
@@ -195,12 +197,15 @@ if __name__ == "__main__":
         with open(filepath_2, "w") as results_file:
                 results_file.write(json.dumps(base_preflist) + "\n")
         
-                with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+                with multiprocessing.Pool(
+                    processes=multiprocessing.cpu_count(),
+                    initializer=init_worker,
+                    initargs=(preflist,)
+                ) as pool:
         
                     modifications = product(permutations(range(n)), repeat=2)
-                    args = ((preflist, modification) for modification in modifications)
         
-                    for i, (result, ratio) in enumerate(executor.map(process_modification_2, args, chunksize=100)):
+                    for i, (result, ratio) in enumerate(pool.imap_unordered(process_modification_2, modifications, chunksize=100)):
                         if i % 10000 == 0:
                             print(i)
         
